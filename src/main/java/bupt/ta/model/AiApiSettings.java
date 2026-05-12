@@ -11,6 +11,7 @@ package bupt.ta.model;
 public class AiApiSettings {
 
     private boolean apiEnabled = true;
+    private boolean streamingEnabled = false;
     private String provider = "deepseek";
     private String baseUrl = "";
     private String model = "";
@@ -22,6 +23,19 @@ public class AiApiSettings {
 
     public void setApiEnabled(boolean apiEnabled) {
         this.apiEnabled = apiEnabled;
+    }
+
+    /**
+     * When true, text-producing endpoints stream tokens to the browser via SSE; when false
+     * they return a single JSON payload. Affects match insight + applicant summary; CV
+     * extraction always uses the JSON path because the response must be a parseable object.
+     */
+    public boolean isStreamingEnabled() {
+        return streamingEnabled;
+    }
+
+    public void setStreamingEnabled(boolean streamingEnabled) {
+        this.streamingEnabled = streamingEnabled;
     }
 
     public String getProvider() {

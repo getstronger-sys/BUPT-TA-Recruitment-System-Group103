@@ -65,6 +65,10 @@
                         <input id="admin-ai-enabled" type="checkbox" name="apiEnabled" <%= settings.isApiEnabled() ? "checked" : "" %>>
                         Enable LLM features (calls are skipped when unchecked, even if a key is saved)
                     </label>
+                    <label class="checkbox-line" for="admin-ai-streaming">
+                        <input id="admin-ai-streaming" type="checkbox" name="streamingEnabled" <%= settings.isStreamingEnabled() ? "checked" : "" %>>
+                        Enable streaming responses (insight and summary text appears token-by-token instead of after the full response)
+                    </label>
                     <label for="admin-ai-provider">Provider <span class="muted-inline">(label only)</span></label>
                     <input id="admin-ai-provider" type="text" name="provider" value="<%= escHtml(settings.getProvider()) %>" placeholder="deepseek / openai / moonshot / ollama ...">
                     <label for="admin-ai-base">API Base URL</label>

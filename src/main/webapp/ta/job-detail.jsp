@@ -332,6 +332,7 @@
         </aside>
     </div>
 </div>
+<script src="${pageContext.request.contextPath}/js/llm-stream.js"></script>
 <script>
 (function () {
     function escapeHtml(text) {
@@ -346,6 +347,15 @@
     var resultBox = card.querySelector(".match-insight-result");
     var jobId = card.getAttribute("data-job-id");
 
+    function renderInsight(text, showDisclaimer) {
+        var html = "<p class='pre-wrap llm-insight-body'></p>";
+        if (showDisclaimer) {
+            html += "<p class='muted-inline llm-insight-disclaimer'>Narrative only; verify facts before decisions.</p>";
+        }
+        resultBox.innerHTML = html;
+        resultBox.querySelector(".llm-insight-body").textContent = text;
+    }
+
     btn.addEventListener("click", function () {
         if (!jobId) return;
         var oldText = btn.textContent;
@@ -354,26 +364,26 @@
         resultBox.innerHTML = "<p class='muted-inline'>Calling AI, this may take up to 30 seconds...</p>";
 
         var url = "${pageContext.request.contextPath}/ta/match-insight?jobId=" + encodeURIComponent(jobId);
-        fetch(url, { method: "GET", credentials: "same-origin" })
-            .then(function (resp) {
-                return resp.json().then(function (data) { return { ok: resp.ok, body: data }; });
-            })
-            .then(function (res) {
-                if (!res.ok || !res.body || !res.body.ok) {
-                    var msg = (res.body && res.body.error) ? res.body.error : "Failed to generate insight";
-                    throw new Error(msg);
-                }
-                resultBox.innerHTML =
-                    "<p class='pre-wrap llm-insight-body'>" + escapeHtml(res.body.insight) + "</p>" +
-                    "<p class='muted-inline llm-insight-disclaimer'>Narrative only; verify facts before decisions.</p>";
+        LlmStream.call(url, {
+            onChunk: function (accumulated) {
+                renderInsight(accumulated, false);
+            },
+            onDone: function (accumulated) {
+                renderInsight(accumulated, true);
                 btn.textContent = "Regenerate AI insight";
                 btn.disabled = false;
-            })
-            .catch(function (err) {
-                resultBox.innerHTML = "<p class='error'>AI insight failed: " + escapeHtml(err.message || "Unknown error") + "</p>";
+            },
+            onJson: function (body) {
+                renderInsight(body.insight || "", true);
+                btn.textContent = "Regenerate AI insight";
+                btn.disabled = false;
+            },
+            onError: function (msg) {
+                resultBox.innerHTML = "<p class='error'>AI insight failed: " + escapeHtml(msg || "Unknown error") + "</p>";
                 btn.textContent = oldText;
                 btn.disabled = false;
-            });
+            }
+        });
     });
 })();
 </script>

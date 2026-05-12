@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Builds short MO-facing screening summaries for one application.
@@ -40,13 +41,9 @@ public final class LlmApplicantSummaryService {
             return buildFallbackSummary(profile, job, match, currentWorkload, workloadBalanced);
         }
 
-        String systemPrompt = "You assist a university MO in screening TA applications. "
-                + "Return exactly 5 to 8 short lines, each line plain text without markdown bullets or numbering. "
-                + "Cover: core skills, strongest fit points, key risks/gaps, workload fairness signal, and interview recommendation. "
-                + "Use factual language and do not invent data.";
-        String userMessage = buildPromptData(profile, job, match, currentWorkload, workloadBalanced);
+        String[] prompt = buildPromptPair(profile, job, match, currentWorkload, workloadBalanced);
         try {
-            String raw = client.chat(systemPrompt, userMessage);
+            String raw = client.chat(prompt[0], prompt[1]);
             List<String> lines = normalizeLines(raw);
             if (lines.size() >= 5) {
                 return lines;
@@ -55,6 +52,34 @@ public final class LlmApplicantSummaryService {
             // Fall through to deterministic summary.
         }
         return buildFallbackSummary(profile, job, match, currentWorkload, workloadBalanced);
+    }
+
+    /**
+     * Streaming counterpart of {@link #buildSummaryLines}. Pushes each token chunk to
+     * {@code onChunk} and returns the full raw text the LLM produced (caller can normalise
+     * into lines if needed). The deterministic fallback used in the non-streaming path is
+     * skipped here because we have already started emitting an SSE response when the LLM
+     * call fails; surface the error to the caller instead.
+     */
+    public String buildSummaryStream(TAProfile profile, Job job, AIMatchService.MatchResult match,
+                                     int currentWorkload, boolean workloadBalanced,
+                                     Consumer<String> onChunk) throws IOException {
+        if (job == null || match == null) {
+            throw new IOException("Job and match result are required for AI summary.");
+        }
+        String[] prompt = buildPromptPair(profile, job, match, currentWorkload, workloadBalanced);
+        String full = client.chatStream(prompt[0], prompt[1], onChunk);
+        return full != null ? full : "";
+    }
+
+    private static String[] buildPromptPair(TAProfile profile, Job job, AIMatchService.MatchResult match,
+                                            int currentWorkload, boolean workloadBalanced) {
+        String systemPrompt = "You assist a university MO in screening TA applications. "
+                + "Return exactly 5 to 8 short lines, each line plain text without markdown bullets or numbering. "
+                + "Cover: core skills, strongest fit points, key risks/gaps, workload fairness signal, and interview recommendation. "
+                + "Use factual language and do not invent data.";
+        String userMessage = buildPromptData(profile, job, match, currentWorkload, workloadBalanced);
+        return new String[]{systemPrompt, userMessage};
     }
 
     private static String buildPromptData(TAProfile profile,

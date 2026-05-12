@@ -5,7 +5,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -13,6 +16,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * DeepSeek Chat API (OpenAI-compatible: POST /v1/chat/completions).
@@ -199,6 +203,111 @@ public final class DeepSeekClient {
             throw new IOException("DeepSeek unexpected response: " + response.body());
         }
         return msg.get("content").getAsString();
+    }
+
+    /**
+     * Streaming counterpart of {@link #chat(String, String)}. Pushes each non-empty content
+     * delta from the OpenAI-compatible SSE response to {@code onChunk}. Returns the
+     * concatenation of all delivered chunks so callers can also persist or log the full text.
+     * The consumer is not called for the final {@code [DONE]} sentinel.
+     *
+     * @throws IllegalStateException if not configured
+     * @throws IOException          HTTP, parsing, or upstream API errors
+     */
+    public String chatStream(String systemPrompt, String userMessage, Consumer<String> onChunk) throws IOException {
+        Objects.requireNonNull(userMessage, "userMessage");
+        Objects.requireNonNull(onChunk, "onChunk");
+        if (!isConfigured()) {
+            throw new IllegalStateException("DEEPSEEK_API_KEY is not set; cannot call DeepSeek API.");
+        }
+
+        JsonArray messages = new JsonArray();
+        if (systemPrompt != null && !systemPrompt.trim().isEmpty()) {
+            JsonObject sys = new JsonObject();
+            sys.addProperty("role", "system");
+            sys.addProperty("content", systemPrompt.trim());
+            messages.add(sys);
+        }
+        JsonObject user = new JsonObject();
+        user.addProperty("role", "user");
+        user.addProperty("content", userMessage);
+        messages.add(user);
+
+        JsonObject body = new JsonObject();
+        body.addProperty("model", model);
+        body.add("messages", messages);
+        body.addProperty("temperature", 0.3);
+        body.addProperty("stream", true);
+
+        String url = baseUrl + "/v1/chat/completions";
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .timeout(Duration.ofMinutes(2))
+                .header("Content-Type", "application/json; charset=utf-8")
+                .header("Accept", "text/event-stream")
+                .header("Authorization", "Bearer " + apiKey)
+                .POST(HttpRequest.BodyPublishers.ofString(body.toString(), StandardCharsets.UTF_8))
+                .build();
+
+        HttpResponse<InputStream> response;
+        try {
+            response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("DeepSeek streaming request interrupted", e);
+        }
+
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            throw new IOException("DeepSeek HTTP " + response.statusCode() + " on streaming request");
+        }
+
+        StringBuilder fullText = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(response.body(), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.startsWith("data:")) {
+                    continue;
+                }
+                String payload = line.substring(5).trim();
+                if (payload.isEmpty() || "[DONE]".equals(payload)) {
+                    if ("[DONE]".equals(payload)) {
+                        break;
+                    }
+                    continue;
+                }
+                String chunk = extractDeltaContent(payload);
+                if (chunk != null && !chunk.isEmpty()) {
+                    fullText.append(chunk);
+                    onChunk.accept(chunk);
+                }
+            }
+        }
+        return fullText.toString();
+    }
+
+    private static String extractDeltaContent(String jsonPayload) throws IOException {
+        try {
+            JsonObject root = JsonParser.parseString(jsonPayload).getAsJsonObject();
+            if (root.has("error")) {
+                throw new IOException("DeepSeek API error: " + root.get("error"));
+            }
+            JsonArray choices = root.getAsJsonArray("choices");
+            if (choices == null || choices.size() == 0) {
+                return null;
+            }
+            JsonObject first = choices.get(0).getAsJsonObject();
+            if (!first.has("delta")) {
+                return null;
+            }
+            JsonObject delta = first.getAsJsonObject("delta");
+            if (delta == null || !delta.has("content") || delta.get("content").isJsonNull()) {
+                return null;
+            }
+            return delta.get("content").getAsString();
+        } catch (IllegalStateException | com.google.gson.JsonSyntaxException e) {
+            throw new IOException("Failed to parse DeepSeek SSE payload: " + jsonPayload, e);
+        }
     }
 
     private static String trimTrailingSlash(String u) {

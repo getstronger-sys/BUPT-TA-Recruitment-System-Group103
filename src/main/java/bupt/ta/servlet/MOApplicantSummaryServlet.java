@@ -3,6 +3,8 @@ package bupt.ta.servlet;
 import bupt.ta.ai.AIMatchService;
 import bupt.ta.llm.DeepSeekClient;
 import bupt.ta.llm.LlmApplicantSummaryService;
+import bupt.ta.llm.SseEmitter;
+import bupt.ta.model.AiApiSettings;
 import bupt.ta.model.Application;
 import bupt.ta.model.Job;
 import bupt.ta.model.TAProfile;
@@ -19,6 +21,9 @@ import java.util.List;
 
 /**
  * MO-only endpoint: generate AI summary for one application on demand.
+ * Streams via SSE when admin enables streaming; otherwise replies with the original JSON
+ * {@code {ok, lines:[...]}} body. The deterministic fallback only applies to the JSON path
+ * because once SSE has started we can no longer rewind the response.
  */
 public class MOApplicantSummaryServlet extends HttpServlet {
 
@@ -26,11 +31,10 @@ public class MOApplicantSummaryServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setContentType("application/json;charset=UTF-8");
         String moId = (String) req.getSession().getAttribute("userId");
         String applicationId = trim(req.getParameter("applicationId"));
         if (moId == null || moId.isEmpty() || applicationId.isEmpty()) {
-            writeError(resp, HttpServletResponse.SC_BAD_REQUEST, "Missing required parameters.");
+            writeJsonError(resp, HttpServletResponse.SC_BAD_REQUEST, "Missing required parameters.");
             return;
         }
 
@@ -44,13 +48,13 @@ public class MOApplicantSummaryServlet extends HttpServlet {
             }
         }
         if (target == null) {
-            writeError(resp, HttpServletResponse.SC_NOT_FOUND, "Application not found.");
+            writeJsonError(resp, HttpServletResponse.SC_NOT_FOUND, "Application not found.");
             return;
         }
 
         Job job = storage.getJobById(target.getJobId());
         if (job == null || !moId.equals(job.getPostedBy())) {
-            writeError(resp, HttpServletResponse.SC_FORBIDDEN, "You do not have access to this application.");
+            writeJsonError(resp, HttpServletResponse.SC_FORBIDDEN, "You do not have access to this application.");
             return;
         }
 
@@ -76,10 +80,22 @@ public class MOApplicantSummaryServlet extends HttpServlet {
         double avgWorkload = selectedApplicants == 0 ? 0 : (selectedTotal * 1.0 / selectedApplicants);
         boolean balanced = currentWorkload <= avgWorkload;
 
-        DeepSeekClient client = DeepSeekClient.fromAdminSettings(storage.loadAiApiSettings());
+        AiApiSettings settings = storage.loadAiApiSettings();
+        DeepSeekClient client = DeepSeekClient.fromAdminSettings(settings);
         LlmApplicantSummaryService summaryService = new LlmApplicantSummaryService(client);
-        List<String> lines = summaryService.buildSummaryLines(profile, job, match, currentWorkload, balanced);
 
+        if (settings.isStreamingEnabled() && client.isConfigured()) {
+            streamSummary(resp, summaryService, profile, job, match, currentWorkload, balanced);
+        } else {
+            replySummaryJson(resp, summaryService, profile, job, match, currentWorkload, balanced);
+        }
+    }
+
+    private static void replySummaryJson(HttpServletResponse resp, LlmApplicantSummaryService service,
+                                         TAProfile profile, Job job, AIMatchService.MatchResult match,
+                                         int currentWorkload, boolean balanced) throws IOException {
+        resp.setContentType("application/json;charset=UTF-8");
+        List<String> lines = service.buildSummaryLines(profile, job, match, currentWorkload, balanced);
         JsonObject data = new JsonObject();
         data.addProperty("ok", true);
         JsonArray arr = new JsonArray();
@@ -90,8 +106,21 @@ public class MOApplicantSummaryServlet extends HttpServlet {
         resp.getWriter().write(data.toString());
     }
 
-    private static void writeError(HttpServletResponse resp, int status, String message) throws IOException {
+    private static void streamSummary(HttpServletResponse resp, LlmApplicantSummaryService service,
+                                      TAProfile profile, Job job, AIMatchService.MatchResult match,
+                                      int currentWorkload, boolean balanced) throws IOException {
+        SseEmitter emitter = new SseEmitter(resp);
+        try {
+            service.buildSummaryStream(profile, job, match, currentWorkload, balanced, emitter::sendChunk);
+            emitter.sendDone();
+        } catch (IOException | IllegalStateException ex) {
+            emitter.sendError(ex.getMessage() != null ? ex.getMessage() : "AI streaming failed.");
+        }
+    }
+
+    private static void writeJsonError(HttpServletResponse resp, int status, String message) throws IOException {
         resp.setStatus(status);
+        resp.setContentType("application/json;charset=UTF-8");
         JsonObject error = new JsonObject();
         error.addProperty("ok", false);
         error.addProperty("error", message);

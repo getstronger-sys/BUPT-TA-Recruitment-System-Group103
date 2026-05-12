@@ -70,6 +70,7 @@ public class AdminAiApiSettingsServlet extends HttpServlet {
         }
 
         settings.setApiEnabled(req.getParameter("apiEnabled") != null);
+        settings.setStreamingEnabled(req.getParameter("streamingEnabled") != null);
         settings.setProvider(provider);
         settings.setBaseUrl(baseUrl);
         settings.setModel(model);

@@ -847,6 +847,7 @@
     });
 })();
 </script>
+<script src="<%= moCtx %>/js/llm-stream.js"></script>
 <script>
 (function () {
     function escapeHtml(str) {
@@ -872,6 +873,17 @@
         resultBox.innerHTML = html;
     }
 
+    function normalizeRawText(text) {
+        if (!text) return [];
+        return text.split(/\r?\n/)
+            .map(function (s) {
+                return s.replace(/^\s*[\-\*\u2022]\s*/, "")
+                        .replace(/^\s*\d+[\.\)]\s*/, "")
+                        .trim();
+            })
+            .filter(function (s) { return s.length > 0; });
+    }
+
     document.querySelectorAll(".ai-summary-generate-btn").forEach(function (btn) {
         btn.addEventListener("click", function () {
             var appId = btn.getAttribute("data-application-id");
@@ -885,26 +897,28 @@
             btn.textContent = "Generating...";
 
             var url = "<%= moCtx %>/mo/applicant-summary?applicationId=" + encodeURIComponent(appId);
-            fetch(url, { method: "GET", credentials: "same-origin" })
-                .then(function (resp) {
-                    if (!resp.ok) throw new Error("HTTP " + resp.status);
-                    return resp.json();
-                })
-                .then(function (data) {
-                    if (!data || !data.ok) {
-                        throw new Error((data && data.error) ? data.error : "Failed to generate summary");
-                    }
-                    renderLines(resultBox, data.lines);
+            LlmStream.call(url, {
+                onChunk: function (accumulated) {
+                    renderLines(resultBox, normalizeRawText(accumulated));
+                },
+                onDone: function (accumulated) {
+                    renderLines(resultBox, normalizeRawText(accumulated));
                     btn.textContent = "Regenerate AI summary";
                     btn.disabled = false;
-                })
-                .catch(function (err) {
+                },
+                onJson: function (data) {
+                    renderLines(resultBox, data.lines || []);
+                    btn.textContent = "Regenerate AI summary";
+                    btn.disabled = false;
+                },
+                onError: function (msg) {
                     if (resultBox) {
-                        resultBox.innerHTML = "<p class='section-copy error'>AI summary failed: " + escapeHtml(err.message || "Unknown error") + "</p>";
+                        resultBox.innerHTML = "<p class='section-copy error'>AI summary failed: " + escapeHtml(msg || "Unknown error") + "</p>";
                     }
                     btn.textContent = oldText;
                     btn.disabled = false;
-                });
+                }
+            });
         });
     });
 })();
