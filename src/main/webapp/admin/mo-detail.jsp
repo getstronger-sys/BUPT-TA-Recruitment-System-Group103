@@ -114,12 +114,8 @@
                 <span class="admin-metric-strip__item">Auto-closed <strong><%= report.getAutoClosedCount() %></strong></span>
             </div>
 
-            <details class="detail-card admin-detail-card--account admin-section-collapse">
-                <summary class="admin-section-collapse__summary">
-                    <span class="admin-section-collapse__chev" aria-hidden="true"></span>
-                    <span class="admin-section-collapse__title">Account record</span>
-                </summary>
-                <div class="admin-section-collapse__body">
+            <section class="detail-card">
+                <h3>Account record</h3>
                 <dl class="admin-kv-list">
                     <dt>User ID</dt><dd><code><%= escHtml(user.getId()) %></code></dd>
                     <dt>Role</dt><dd>MO</dd>
@@ -127,8 +123,7 @@
                     <dt>Real name</dt><dd><%= escHtml(user.getRealName() != null && !user.getRealName().isEmpty() ? user.getRealName() : "-") %></dd>
                     <dt>Email</dt><dd><%= escHtml(user.getEmail() != null && !user.getEmail().isEmpty() ? user.getEmail() : "-") %></dd>
                 </dl>
-                </div>
-            </details>
+            </section>
 
             <details class="detail-card admin-section-collapse"
                 <% if ("1".equals(request.getParameter("assignedUpdated")) || (assignError != null && !assignError.trim().isEmpty())) { %>open<% } %>>

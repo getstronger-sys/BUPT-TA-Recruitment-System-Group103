@@ -49,11 +49,7 @@
         <main class="main-panel admin-main">
             <p class="breadcrumb-line"><a href="${pageContext.request.contextPath}/admin/users">&larr; Back to user directory</a></p>
             <h1>TA Detail: <%= escHtml(displayName) %></h1>
-            <p class="ta-page-lead">Read-only traceability view for one TA account, including profile data, saved jobs, application history, interview records, and site notifications.</p>
-            <div class="context-card">
-                <strong>Read-only admin detail</strong>
-                <p>Use this page to verify what the TA submitted and how the system responded over time. IDs, timestamps, status changes, and notifications are shown for auditing.</p>
-            </div>
+            <p class="ta-page-lead">Read-only traceability for this TA account (profile, saved jobs, applications, interviews, notifications). Use it to audit submissions, timestamps, status changes, and system messages—nothing here is editable.</p>
 
             <div class="stats-row admin-stat-grid">
                 <div class="stat-card">
@@ -87,6 +83,16 @@
                         <div class="stat-meta">Unread <%= report.getUnreadNotificationCount() %> | Read <%= report.getReadNotificationCount() %></div>
                     </div>
                 </div>
+            </div>
+
+            <div class="admin-metric-strip" role="region" aria-label="Application status counts">
+                <span class="admin-metric-strip__item">Pending <strong><%= report.getPendingCount() %></strong></span>
+                <span class="admin-metric-strip__item">Interview <strong><%= report.getInterviewCount() %></strong></span>
+                <span class="admin-metric-strip__item">Waitlist <strong><%= report.getWaitlistCount() %></strong></span>
+                <span class="admin-metric-strip__item">Selected <strong><%= report.getSelectedCount() %></strong></span>
+                <span class="admin-metric-strip__item">Rejected <strong><%= report.getRejectedCount() %></strong></span>
+                <span class="admin-metric-strip__item">Withdrawn <strong><%= report.getWithdrawnCount() %></strong></span>
+                <span class="admin-metric-strip__item">Auto-closed <strong><%= report.getAutoClosedCount() %></strong></span>
             </div>
 
             <div class="detail-grid admin-detail-grid">
@@ -125,8 +131,12 @@
                 </section>
             </div>
 
-            <section class="detail-card">
-                <h3>Profile narrative</h3>
+            <details class="detail-card admin-section-collapse">
+                <summary class="admin-section-collapse__summary">
+                    <span class="admin-section-collapse__chev" aria-hidden="true"></span>
+                    <span class="admin-section-collapse__title">Profile narrative</span>
+                </summary>
+                <div class="admin-section-collapse__body">
                 <div class="admin-text-block">
                     <strong>TA experience</strong>
                     <p class="pre-wrap"><%= escHtml(profile.getTaExperience() != null && !profile.getTaExperience().isEmpty() ? profile.getTaExperience() : "Not provided.") %></p>
@@ -135,10 +145,16 @@
                     <strong>Introduction</strong>
                     <p class="pre-wrap"><%= escHtml(profile.getIntroduction() != null && !profile.getIntroduction().isEmpty() ? profile.getIntroduction() : "Not provided.") %></p>
                 </div>
-            </section>
+                </div>
+            </details>
 
-            <section class="detail-card">
-                <h3>Saved jobs</h3>
+            <details class="detail-card admin-section-collapse">
+                <summary class="admin-section-collapse__summary">
+                    <span class="admin-section-collapse__chev" aria-hidden="true"></span>
+                    <span class="admin-section-collapse__title">Saved jobs</span>
+                    <span class="admin-section-collapse__meta"><%= report.getSavedJobsCount() %> saved</span>
+                </summary>
+                <div class="admin-section-collapse__body">
                 <% if (report.getSavedJobs().isEmpty()) { %>
                 <p class="section-empty section-empty--card">This TA has no saved jobs.</p>
                 <% } else { %>
@@ -167,14 +183,20 @@
                     </table>
                 </div>
                 <% } %>
-            </section>
+                </div>
+            </details>
 
-            <section class="detail-card">
-                <h3>Application history</h3>
+            <details class="detail-card admin-section-collapse">
+                <summary class="admin-section-collapse__summary">
+                    <span class="admin-section-collapse__chev" aria-hidden="true"></span>
+                    <span class="admin-section-collapse__title">Application history</span>
+                    <span class="admin-section-collapse__meta"><%= report.getApplicationRows().size() %> application(s)</span>
+                </summary>
+                <div class="admin-section-collapse__body">
                 <% if (report.getApplicationRows().isEmpty()) { %>
                 <p class="section-empty section-empty--card">No applications recorded for this TA.</p>
                 <% } else { %>
-                <p class="table-scroll-wrap-hint">Tip: application IDs, timestamps, and notes stay visible here for traceability.</p>
+                <p class="admin-section-hint muted-inline">Application IDs, timestamps, and notes stay visible here for traceability. Scroll horizontally on narrow screens.</p>
                 <div class="table-scroll-wrap">
                     <table class="admin-table">
                         <thead>
@@ -224,10 +246,16 @@
                     </table>
                 </div>
                 <% } %>
-            </section>
+                </div>
+            </details>
 
-            <section class="detail-card">
-                <h3>Site notifications</h3>
+            <details class="detail-card admin-section-collapse">
+                <summary class="admin-section-collapse__summary">
+                    <span class="admin-section-collapse__chev" aria-hidden="true"></span>
+                    <span class="admin-section-collapse__title">Site notifications</span>
+                    <span class="admin-section-collapse__meta"><%= report.getNotificationCount() %> notification(s)</span>
+                </summary>
+                <div class="admin-section-collapse__body">
                 <% if (report.getNotifications().isEmpty()) { %>
                 <p class="section-empty section-empty--card">No site notifications have been sent to this TA.</p>
                 <% } else { %>
@@ -261,7 +289,8 @@
                     </table>
                 </div>
                 <% } %>
-            </section>
+                </div>
+            </details>
         </main>
         <aside class="right-sidebar">
             <div class="widget-card">
