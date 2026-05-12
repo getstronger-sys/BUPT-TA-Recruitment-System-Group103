@@ -417,10 +417,12 @@
                                 <div class="section-label">AI Review</div>
                                 <p class="section-copy"><strong>Missing skills:</strong> <%= missingText %></p>
                                 <p class="section-copy"><strong>Workload:</strong> <%= rec.currentWorkload %> jobs</p>
+                                <% if (Boolean.TRUE.equals(request.getAttribute("llmEnabled"))) { %>
                                 <div class="ai-summary-actions">
                                     <button type="button" class="btn btn-secondary btn-sm ai-summary-generate-btn" data-application-id="<%= escHtml(a.getId()) %>">Generate AI summary</button>
                                 </div>
                                 <div class="ai-summary-result" data-application-id="<%= escHtml(a.getId()) %>"></div>
+                                <% } %>
                             </section>
                             <section class="applicant-section">
                                 <div class="section-label">Application</div>
@@ -554,10 +556,12 @@
                             <section class="applicant-section">
                                 <div class="section-label">AI Review</div>
                                 <p class="section-copy"><strong>Missing skills:</strong> <%= missingText %></p>
+                                <% if (Boolean.TRUE.equals(request.getAttribute("llmEnabled"))) { %>
                                 <div class="ai-summary-actions">
                                     <button type="button" class="btn btn-secondary btn-sm ai-summary-generate-btn" data-application-id="<%= escHtml(a.getId()) %>">Generate AI summary</button>
                                 </div>
                                 <div class="ai-summary-result" data-application-id="<%= escHtml(a.getId()) %>"></div>
+                                <% } %>
                             </section>
                             <section class="applicant-section">
                                 <div class="section-label">Application</div>
@@ -634,10 +638,12 @@
                             <section class="applicant-section">
                                 <div class="section-label">AI Review</div>
                                 <p class="section-copy"><strong>Missing skills:</strong> <%= missingText %></p>
+                                <% if (Boolean.TRUE.equals(request.getAttribute("llmEnabled"))) { %>
                                 <div class="ai-summary-actions">
                                     <button type="button" class="btn btn-secondary btn-sm ai-summary-generate-btn" data-application-id="<%= escHtml(a.getId()) %>">Generate AI summary</button>
                                 </div>
                                 <div class="ai-summary-result" data-application-id="<%= escHtml(a.getId()) %>"></div>
+                                <% } %>
                             </section>
                             <section class="applicant-section">
                                 <div class="section-label">Application</div>
@@ -742,10 +748,12 @@
                             <section class="applicant-section">
                                 <div class="section-label">AI Review</div>
                                 <p class="section-copy"><strong>Missing skills:</strong> <%= missingText %></p>
+                                <% if (Boolean.TRUE.equals(request.getAttribute("llmEnabled"))) { %>
                                 <div class="ai-summary-actions">
                                     <button type="button" class="btn btn-secondary btn-sm ai-summary-generate-btn" data-application-id="<%= escHtml(a.getId()) %>">Generate AI summary</button>
                                 </div>
                                 <div class="ai-summary-result" data-application-id="<%= escHtml(a.getId()) %>"></div>
+                                <% } %>
                             </section>
                             <section class="applicant-section">
                                 <div class="section-label">Application</div>

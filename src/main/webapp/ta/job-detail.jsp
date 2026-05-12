@@ -108,6 +108,7 @@
                 <% if (match.matched != null && !match.matched.isEmpty()) { %> · Matched: <%= escHtml(String.join(", ", match.matched)) %><% } %>
             </p>
             <% } %>
+            <% if (Boolean.TRUE.equals(request.getAttribute("llmEnabled"))) { %>
             <div class="llm-insight-card context-card" data-match-insight data-job-id="<%= escHtml(job.getId()) %>">
                 <strong>AI match insight (DeepSeek)</strong>
                 <p class="muted-inline">Click to generate a short narrative about strengths, gaps, and practical fit. The rule-based score above is not affected.</p>
@@ -116,6 +117,7 @@
                 </div>
                 <div class="match-insight-result"></div>
             </div>
+            <% } %>
 
             <div class="ta-job-detail">
 

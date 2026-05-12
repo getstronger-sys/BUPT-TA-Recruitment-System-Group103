@@ -60,19 +60,15 @@ public class AiApiSettings {
     }
 
     /**
-     * @return true if a real call is allowed: enabled, provider acceptable, and key present.
+     * @return true if a real call is allowed: enabled and key present. The {@code provider}
+     *         field is treated as a free-form label and is not validated here, because the
+     *         underlying HTTP client speaks the OpenAI-compatible protocol that several
+     *         vendors (DeepSeek, OpenAI, Moonshot, Ollama, ...) already support.
      */
     public boolean isEffectivelyConfigured() {
         if (!apiEnabled) {
             return false;
         }
-        if (apiKey == null || apiKey.trim().isEmpty()) {
-            return false;
-        }
-        if (provider != null && !provider.trim().isEmpty()
-                && !"deepseek".equalsIgnoreCase(provider.trim())) {
-            return false;
-        }
-        return true;
+        return apiKey != null && !apiKey.trim().isEmpty();
     }
 }

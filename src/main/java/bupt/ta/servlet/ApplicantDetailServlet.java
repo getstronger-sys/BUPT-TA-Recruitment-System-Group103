@@ -76,6 +76,7 @@ public class ApplicantDetailServlet extends HttpServlet {
         req.setAttribute("pendingCount", pending);
         req.setAttribute("interviewCount", interview);
         req.setAttribute("otherCount", rejectedOrWithdrawn);
+        req.setAttribute("llmEnabled", storage.loadAiApiSettings().isEffectivelyConfigured());
         req.getRequestDispatcher("/mo/applicant-detail.jsp").forward(req, resp);
     }
 }

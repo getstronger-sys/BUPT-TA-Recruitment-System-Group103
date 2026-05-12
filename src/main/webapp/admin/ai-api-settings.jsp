@@ -65,12 +65,12 @@
                         <input id="admin-ai-enabled" type="checkbox" name="apiEnabled" <%= settings.isApiEnabled() ? "checked" : "" %>>
                         Enable LLM features (calls are skipped when unchecked, even if a key is saved)
                     </label>
-                    <label for="admin-ai-provider">Provider</label>
-                    <input id="admin-ai-provider" type="text" name="provider" value="<%= escHtml(settings.getProvider()) %>" placeholder="deepseek">
+                    <label for="admin-ai-provider">Provider <span class="muted-inline">(label only)</span></label>
+                    <input id="admin-ai-provider" type="text" name="provider" value="<%= escHtml(settings.getProvider()) %>" placeholder="deepseek / openai / moonshot / ollama ...">
                     <label for="admin-ai-base">API Base URL</label>
-                    <input id="admin-ai-base" type="text" name="baseUrl" value="<%= escHtml(settings.getBaseUrl()) %>" placeholder="https://api.deepseek.com (leave empty for default)">
+                    <input id="admin-ai-base" type="text" name="baseUrl" value="<%= escHtml(settings.getBaseUrl()) %>" placeholder="https://api.deepseek.com (any OpenAI-compatible endpoint)">
                     <label for="admin-ai-model">Model name</label>
-                    <input id="admin-ai-model" type="text" name="model" value="<%= escHtml(settings.getModel()) %>" placeholder="deepseek-chat (leave empty for default)">
+                    <input id="admin-ai-model" type="text" name="model" value="<%= escHtml(settings.getModel()) %>" placeholder="deepseek-chat / gpt-4o-mini / qwen2.5 ...">
                     <label for="admin-ai-key">API key</label>
                     <input id="admin-ai-key" type="password" name="apiKey" value="" autocomplete="off" placeholder="(unchanged if empty)">
                     <button type="submit" class="btn btn-primary">Save AI API settings</button>

@@ -131,6 +131,7 @@ public class MOJobsServlet extends HttpServlet {
             req.setAttribute("moJobsCountOutcome", countOutcome);
         }
 
+        req.setAttribute("llmEnabled", storage.loadAiApiSettings().isEffectivelyConfigured());
         req.getRequestDispatcher("/mo/jobs.jsp").forward(req, resp);
     }
 

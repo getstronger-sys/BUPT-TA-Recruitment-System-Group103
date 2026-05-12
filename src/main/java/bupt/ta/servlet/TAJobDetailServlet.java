@@ -42,6 +42,7 @@ public class TAJobDetailServlet extends HttpServlet {
         req.setAttribute("job", job);
         req.setAttribute("match", match);
         req.setAttribute("saved", saved);
+        req.setAttribute("llmEnabled", storage.loadAiApiSettings().isEffectivelyConfigured());
         req.getRequestDispatcher("/ta/job-detail.jsp").forward(req, resp);
     }
 }

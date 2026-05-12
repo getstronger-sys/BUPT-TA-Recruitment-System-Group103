@@ -69,7 +69,7 @@
         <strong>Review Tip</strong>
         <p>Check skills fit, availability and previous application status together for a balanced selection.</p>
     </div>
-    <% if (user != null) { %>
+    <% if (user != null && Boolean.TRUE.equals(request.getAttribute("llmEnabled"))) { %>
     <div class="llm-insight-card context-card" data-applicant-insight data-applicant-id="<%= escHtml(user.getId()) %>">
         <strong>AI applicant insight (DeepSeek)</strong>
         <p class="muted-inline">Click to generate a short narrative comparing this applicant to their most recent application to your jobs.</p>

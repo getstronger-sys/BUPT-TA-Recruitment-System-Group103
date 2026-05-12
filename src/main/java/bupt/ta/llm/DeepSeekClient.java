@@ -81,17 +81,17 @@ public final class DeepSeekClient {
 
     /**
      * Build a client strictly from admin-managed settings. When {@code settings} is null,
-     * disabled, missing the key, or has a non-deepseek provider, the returned client reports
-     * {@link #isConfigured()} == false and refuses to send requests.
+     * disabled or missing the key, the returned client reports {@link #isConfigured()} ==
+     * false and refuses to send requests. The {@code provider} field is treated as a
+     * free-form label and does not gate calls, so an admin can repoint Base URL / Model at
+     * any OpenAI-compatible endpoint (DeepSeek, OpenAI, Moonshot, Ollama, ...).
      */
     public static DeepSeekClient fromAdminSettings(AiApiSettings settings) {
         if (settings == null) {
             return new DeepSeekClient(false, "", "", "");
         }
-        boolean providerOk = isProviderAccepted(settings.getProvider());
-        boolean effectivelyEnabled = settings.isApiEnabled() && providerOk;
         return new DeepSeekClient(
-                effectivelyEnabled,
+                settings.isApiEnabled(),
                 settings.getApiKey(),
                 settings.getBaseUrl(),
                 settings.getModel()
