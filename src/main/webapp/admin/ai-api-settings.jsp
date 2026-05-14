@@ -6,6 +6,7 @@
     if (settings == null) settings = new AiApiSettings();
     Boolean effectiveOk = (Boolean) request.getAttribute("deepSeekEffectiveConfigured");
     boolean effectiveConfigured = effectiveOk != null && effectiveOk;
+    request.setAttribute("adminNavActive", "ai");
 %>
 <!DOCTYPE html>
 <html>
@@ -31,29 +32,36 @@
                 <div class="icon-dot active">A</div>
                 <div class="icon-dot">U</div>
             </div>
-            <aside class="side-nav">
-                <a href="${pageContext.request.contextPath}/admin/dashboard">Summary</a>
-                <a href="${pageContext.request.contextPath}/admin/workload">Workload</a>
-                <a href="${pageContext.request.contextPath}/admin/monitoring">Monitoring</a>
-                <a href="${pageContext.request.contextPath}/admin/email">Email</a>
-                <a class="active" href="${pageContext.request.contextPath}/admin/ai-api">AI API</a>
-                <a href="${pageContext.request.contextPath}/admin/users">Users</a>
-            </aside>
+            <%@ include file="/WEB-INF/jspf/admin-side-nav.jspf" %>
         </div>
-        <main class="main-panel admin-main">
-            <h1>AI / LLM API (DeepSeek)</h1>
-            <p class="ta-page-lead">Configure the DeepSeek-compatible endpoint used for CV pre-fill, match insight and MO screening summaries.</p>
+        <main class="main-panel admin-main admin-page">
+            <header class="ta-page-header">
+                <p class="ta-page-kicker">Integration</p>
+                <h1>AI / LLM API (DeepSeek)</h1>
+                <p class="ta-page-lead">Configure the DeepSeek-compatible endpoint used for CV pre-fill, match insight and MO screening summaries.</p>
+            </header>
 
+            <% boolean adminAiFlash = "1".equals(request.getParameter("saved"));
+               String adminAiErr = (String) request.getAttribute("error");
+               if (adminAiFlash || adminAiErr != null) { %>
+            <div class="ta-page-flashes">
             <% if ("1".equals(request.getParameter("saved"))) { %>
             <p class="success">AI API settings saved.</p>
             <% } %>
-            <% String err = (String) request.getAttribute("error"); if (err != null) { %>
-            <p class="error"><%= escHtml(err) %></p>
+            <% if (adminAiErr != null) { %>
+            <p class="error"><%= escHtml(adminAiErr) %></p>
+            <% } %>
+            </div>
             <% } %>
 
-            <div class="context-card">
+            <div class="context-card admin-workload-rule">
                 <strong>Current status</strong>
-                <p>Runtime state: <strong><%= effectiveConfigured ? "Configured (calls allowed)" : "Not configured" %></strong>.</p>
+                <dl class="admin-workload-rule__list">
+                    <div class="admin-workload-rule__row">
+                        <dt>Runtime state</dt>
+                        <dd><%= effectiveConfigured ? "Configured (calls allowed)" : "Not configured" %></dd>
+                    </div>
+                </dl>
             </div>
 
             <section class="detail-card admin-settings-card">
@@ -82,13 +90,13 @@
             </section>
         </main>
         <aside class="right-sidebar">
-            <div class="widget-card">
+            <div class="widget-card ta-widget-card">
                 <div class="widget-title">Where this is used</div>
                 <p class="widget-line">CV auto-fill when a TA uploads a resume.</p>
                 <p class="widget-line">Skill match insight on TA job detail and MO applicant detail pages.</p>
                 <p class="widget-line">MO screening summary card on the applicant review panel.</p>
             </div>
-            <div class="widget-card">
+            <div class="widget-card ta-widget-card">
                 <div class="widget-title">Tips</div>
                 <p class="widget-line">Uncheck "Enable LLM features" to pause AI calls without clearing your saved key.</p>
                 <p class="widget-line">Leave Base URL / Model empty to use DeepSeek defaults.</p>

@@ -4,6 +4,7 @@
 <%
     AdminSettings settings = (AdminSettings) request.getAttribute("adminSettings");
     if (settings == null) settings = new AdminSettings();
+    request.setAttribute("adminNavActive", "email");
 %>
 <!DOCTYPE html>
 <html>
@@ -29,24 +30,26 @@
                 <div class="icon-dot">A</div>
                 <div class="icon-dot">U</div>
             </div>
-            <aside class="side-nav">
-                <a href="${pageContext.request.contextPath}/admin/dashboard">Summary</a>
-                <a href="${pageContext.request.contextPath}/admin/workload">Workload</a>
-                <a href="${pageContext.request.contextPath}/admin/monitoring">Monitoring</a>
-                <a class="active" href="${pageContext.request.contextPath}/admin/email">Email</a>
-                <a href="${pageContext.request.contextPath}/admin/ai-api">AI API</a>
-                <a href="${pageContext.request.contextPath}/admin/users">Users</a>
-            </aside>
+            <%@ include file="/WEB-INF/jspf/admin-side-nav.jspf" %>
         </div>
-        <main class="main-panel admin-main">
-            <h1>Email (SMTP) settings</h1>
-            <p class="ta-page-lead">Configure SMTP delivery for email notifications and unread-message reminders.</p>
+        <main class="main-panel admin-main admin-page">
+            <header class="ta-page-header">
+                <p class="ta-page-kicker">Messaging</p>
+                <h1>Email (SMTP) settings</h1>
+                <p class="ta-page-lead">Configure SMTP delivery for email notifications and unread-message reminders.</p>
+            </header>
 
+            <% boolean adminEmailFlash = "1".equals(request.getParameter("saved"));
+               String adminEmailErr = (String) request.getAttribute("error");
+               if (adminEmailFlash || adminEmailErr != null) { %>
+            <div class="ta-page-flashes">
             <% if ("1".equals(request.getParameter("saved"))) { %>
             <p class="success">Email settings saved.</p>
             <% } %>
-            <% String err = (String) request.getAttribute("error"); if (err != null) { %>
-            <p class="error"><%= escHtml(err) %></p>
+            <% if (adminEmailErr != null) { %>
+            <p class="error"><%= escHtml(adminEmailErr) %></p>
+            <% } %>
+            </div>
             <% } %>
 
             <section class="detail-card admin-settings-card">
@@ -87,7 +90,7 @@
             </section>
         </main>
         <aside class="right-sidebar">
-            <div class="widget-card">
+            <div class="widget-card ta-widget-card">
                 <div class="widget-title">Tips</div>
                 <p class="widget-line">Port 587: STARTTLS on, SSL off.</p>
                 <p class="widget-line">Port 465: SSL on, STARTTLS off.</p>

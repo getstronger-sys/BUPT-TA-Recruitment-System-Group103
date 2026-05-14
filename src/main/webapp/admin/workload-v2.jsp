@@ -12,6 +12,7 @@
     if (avgEstimatedHours == null) avgEstimatedHours = 0.0;
     AdminSettings settings = (AdminSettings) request.getAttribute("adminSettings");
     if (settings == null) settings = new AdminSettings();
+    request.setAttribute("adminNavActive", "workload");
 %>
 <!DOCTYPE html>
 <html>
@@ -37,28 +38,41 @@
                 <div class="icon-dot">A</div>
                 <div class="icon-dot">U</div>
             </div>
-            <aside class="side-nav">
-                <a href="${pageContext.request.contextPath}/admin/dashboard">Summary</a>
-                <a class="active" href="${pageContext.request.contextPath}/admin/workload">Workload</a>
-                <a href="${pageContext.request.contextPath}/admin/monitoring">Monitoring</a>
-                <a href="${pageContext.request.contextPath}/admin/email">Email</a>
-                <a href="${pageContext.request.contextPath}/admin/ai-api">AI API</a>
-                <a href="${pageContext.request.contextPath}/admin/users">Users</a>
-            </aside>
+            <%@ include file="/WEB-INF/jspf/admin-side-nav.jspf" %>
         </div>
-        <main class="main-panel admin-main">
-            <h1>TA Overall Workload</h1>
-            <p class="ta-page-lead">Review selected and pending load distribution across TAs to keep recruitment decisions balanced and policy-compliant.</p>
-            <div class="context-card">
+        <main class="main-panel admin-main admin-page">
+            <header class="ta-page-header">
+                <p class="ta-page-kicker">Workload</p>
+                <h1>TA Overall Workload</h1>
+                <p class="ta-page-lead">Review selected and pending load distribution across TAs to keep recruitment decisions balanced and policy-compliant.</p>
+            </header>
+            <div class="context-card admin-workload-rule">
                 <strong>Workload rule</strong>
-                <p>Average selected jobs per TA: <strong><%= String.format("%.1f", avgWorkload) %></strong>.
-                    Average estimated hours (structured arrangements): <strong><%= String.format("%.1f", avgEstimatedHours) %> h</strong>.
+                <dl class="admin-workload-rule__list">
+                    <div class="admin-workload-rule__row">
+                        <dt>Average selected jobs per TA</dt>
+                        <dd><%= String.format("%.1f", avgWorkload) %></dd>
+                    </div>
+                    <div class="admin-workload-rule__row">
+                        <dt>Average estimated hours (structured arrangements)</dt>
+                        <dd><%= String.format("%.1f", avgEstimatedHours) %> h</dd>
+                    </div>
                     <% if (settings.usesHourWorkloadLimit()) { %>
-                    Hour cap: <strong><%= String.format("%.1f", settings.getMaxWorkloadHoursPerTa()) %> h</strong>.
+                    <div class="admin-workload-rule__row">
+                        <dt>Hour cap</dt>
+                        <dd><%= String.format("%.1f", settings.getMaxWorkloadHoursPerTa()) %> h</dd>
+                    </div>
                     <% } else { %>
-                    Job cap: <strong><%= settings.hasWorkloadLimit() ? settings.getMaxSelectedJobsPerTa() : 0 %></strong>.
+                    <div class="admin-workload-rule__row">
+                        <dt>Job cap</dt>
+                        <dd><%= settings.hasWorkloadLimit() ? settings.getMaxSelectedJobsPerTa() : 0 %></dd>
+                    </div>
                     <% } %>
-                    Auto-close pending: <strong><%= settings.isAutoClosePendingWhenLimitReached() ? "ON" : "OFF" %></strong>.</p>
+                    <div class="admin-workload-rule__row">
+                        <dt>Auto-close pending</dt>
+                        <dd><%= settings.isAutoClosePendingWhenLimitReached() ? "ON" : "OFF" %></dd>
+                    </div>
+                </dl>
             </div>
             <p><a href="${pageContext.request.contextPath}/admin/export-workload" class="btn btn-primary">Export to CSV</a></p>
 
@@ -124,7 +138,7 @@
             </div>
         </main>
         <aside class="right-sidebar">
-            <div class="widget-card">
+            <div class="widget-card ta-widget-card">
                 <div class="widget-title">Interpretation</div>
                 <p class="widget-line">Est. hours come from each job’s work arrangements (per-TA average), same as MO planning.</p>
                 <p class="widget-line">With hour cap on, limit flags compare total estimated hours to the admin hour ceiling.</p>

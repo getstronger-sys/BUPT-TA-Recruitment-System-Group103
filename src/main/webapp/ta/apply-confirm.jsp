@@ -113,8 +113,12 @@
                 <% } %>
                 <p class="pre-wrap"><strong>Multi-TA allocation:</strong> <%= escHtml(job.getTaAllocationPlan() != null && !job.getTaAllocationPlan().isEmpty() ? job.getTaAllocationPlan() : "Not provided") %></p>
                 <p class="pre-wrap"><strong>Interview arrangement:</strong>
-                    <%= escHtml(job.getInterviewSchedule() != null && !job.getInterviewSchedule().isEmpty() ? job.getInterviewSchedule() : "Not provided") %>
-                    @ <%= escHtml(job.getInterviewLocation() != null && !job.getInterviewLocation().isEmpty() ? job.getInterviewLocation() : "Not provided") %>
+                    <%= escHtml(job.getInterviewSchedule() != null && !job.getInterviewSchedule().isEmpty() ? job.getInterviewSchedule() : "Not provided") %><%
+                    if (job.getInterviewLocation() != null && !job.getInterviewLocation().trim().isEmpty()) { %>
+                    <br><span class="muted-inline">Location:</span> <%= escHtml(job.getInterviewLocation().trim()) %><%
+                    } else { %>
+                    <br><span class="muted-inline">Location:</span> Not provided<%
+                    } %>
                 </p>
                 <div class="ta-duty-board">
                     <% for (int idx = 1; idx <= taSlots; idx++) {

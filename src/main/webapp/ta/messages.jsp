@@ -116,18 +116,21 @@
             <div class="icon-rail">
                 <div class="icon-dot">H</div>
                 <div class="icon-dot">F</div>
-                <div class="icon-dot">M</div>
+                <div class="icon-dot active">M</div>
                 <div class="icon-dot">P</div>
             </div>
             <%@ include file="/WEB-INF/jspf/ta-side-nav.jspf" %>
         </div>
-        <main class="main-panel ta-main ta-messages-main<%= listMode ? " ta-messages-main--list" : "" %>">
+        <main class="main-panel ta-main ta-page ta-page--messages ta-messages-main<%= listMode ? " ta-messages-main--list" : "" %>">
 <% if (detail != null) {
     Integer backPageObj = (Integer) request.getAttribute("listPageForBack");
     int backPage = backPageObj != null ? backPageObj : 1;
     String backHref = ctx + "/ta/messages?page=" + backPage + boxQuery(listFilter);
 %>
-            <p class="ta-messages-back"><a href="<%= backHref %>">&larr; Back to messages</a></p>
+            <header class="ta-page-header ta-message-detail-page-header">
+                <p class="breadcrumb-line ta-job-detail-breadcrumb"><a href="<%= backHref %>">&larr; Back to messages</a></p>
+                <p class="ta-page-kicker">Notification</p>
+            </header>
             <article class="ta-message-detail-card <%= detail.isRead() ? "ta-message-detail-card--read" : "ta-message-detail-card--unread" %>">
                 <div class="ta-message-detail-meta">
                     <span class="ta-msg-kind <%= kindClass(detail.getKind()) %>"><%= escHtml(kindLabel(detail.getKind())) %></span>
@@ -178,21 +181,24 @@
     Integer totalPagesObj = (Integer) request.getAttribute("messagesTotalPages");
     int totalPages = totalPagesObj != null ? totalPagesObj : 1;
 %>
-            <div class="ta-messages-header">
-                <div>
-                    <h1>Messages</h1>
-                    <p class="ta-page-lead">Filter by read state, click a row for the full message, or mark items in bulk. Ten per page; scroll inside the list.</p>
+            <header class="ta-page-header ta-messages-header">
+                <div class="ta-messages-header__row">
+                    <div class="ta-messages-header__intro">
+                        <p class="ta-page-kicker">Inbox</p>
+                        <h1>Messages</h1>
+                        <p class="ta-page-lead">Filter by read state, open a row for the full message, or mark items in bulk. Ten per page; scroll inside the list.</p>
+                    </div>
+                    <% if (allTotal > 0 && unreadTotal > 0) { %>
+                    <form action="<%= ctx %>/ta/messages" method="post" class="ta-messages-markall">
+                        <%@ include file="/WEB-INF/jspf/csrf-hidden.jspf" %>
+                        <input type="hidden" name="action" value="markAllRead">
+                        <input type="hidden" name="page" value="<%= curPage %>">
+                        <input type="hidden" name="box" value="<%= escHtml(listFilter) %>">
+                        <button type="submit" class="btn btn-secondary">Mark all read</button>
+                    </form>
+                    <% } %>
                 </div>
-                <% if (allTotal > 0 && unreadTotal > 0) { %>
-                <form action="<%= ctx %>/ta/messages" method="post" class="ta-messages-markall">
-                    <%@ include file="/WEB-INF/jspf/csrf-hidden.jspf" %>
-                    <input type="hidden" name="action" value="markAllRead">
-                    <input type="hidden" name="page" value="<%= curPage %>">
-                    <input type="hidden" name="box" value="<%= escHtml(listFilter) %>">
-                    <button type="submit" class="btn btn-secondary">Mark all read</button>
-                </form>
-                <% } %>
-            </div>
+            </header>
 
             <nav class="ta-msg-filter-bar" aria-label="Filter messages">
                 <a class="ta-msg-filter-tab <%= "all".equals(listFilter) ? "ta-msg-filter-tab--active" : "" %>" href="<%= ctx %>/ta/messages?page=1">All <span class="ta-msg-filter-count">(<%= allTotal %>)</span></a>
@@ -201,16 +207,16 @@
             </nav>
 
             <% if (allTotal == 0) { %>
-            <div class="detail-card ta-messages-empty">
+            <div class="ta-panel ta-panel--tip ta-messages-empty-panel ta-messages-empty">
                 <p class="ta-messages-empty-title">No messages yet</p>
-                <p class="muted-inline">When you apply or when a module organiser updates your application, a message will appear here.</p>
-                <p><a href="<%= ctx %>/ta/jobs" class="btn btn-primary">Browse jobs</a></p>
+                <p class="ta-panel__body muted-inline">When you apply or when a module organiser updates your application, a message will appear here.</p>
+                <p class="ta-messages-empty-actions"><a href="<%= ctx %>/ta/jobs" class="btn btn-primary">Browse jobs</a></p>
             </div>
             <% } else if (total == 0) { %>
-            <div class="detail-card ta-messages-empty">
+            <div class="ta-panel ta-panel--tip ta-messages-empty-panel ta-messages-empty">
                 <p class="ta-messages-empty-title">No messages in this view</p>
-                <p class="muted-inline"><% if ("unread".equals(listFilter)) { %>There are no unread messages.<% } else { %>There are no read messages.<% } %></p>
-                <p><a href="<%= ctx %>/ta/messages?page=1" class="btn btn-primary">Show all</a></p>
+                <p class="ta-panel__body muted-inline"><% if ("unread".equals(listFilter)) { %>There are no unread messages.<% } else { %>There are no read messages.<% } %></p>
+                <p class="ta-messages-empty-actions"><a href="<%= ctx %>/ta/messages?page=1" class="btn btn-primary">Show all</a></p>
             </div>
             <% } else { %>
             <div class="ta-messages-list-layout">
@@ -275,7 +281,7 @@
 <% } %>
         </main>
         <aside class="right-sidebar">
-            <div class="widget-card">
+            <div class="widget-card ta-widget-card">
                 <div class="widget-title">Inbox</div>
 <% if (detail != null) {
     Integer unreadDetailObj = (Integer) request.getAttribute("notificationsUnreadTotal");
@@ -306,7 +312,7 @@
                 <p class="widget-line">Total: <%= allTotalW %></p>
 <% } %>
             </div>
-            <div class="widget-card">
+            <div class="widget-card ta-widget-card">
                 <div class="widget-title">Tip</div>
                 <p class="widget-line">Use <strong>Mark selected unread</strong> on the list to restore unread state.</p>
             </div>

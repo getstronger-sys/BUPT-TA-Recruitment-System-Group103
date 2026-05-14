@@ -32,6 +32,7 @@
     String ctx = request.getContextPath();
     DateTimeFormatter dayFmt = DateTimeFormatter.ofPattern("EEEE, yyyy-MM-dd", java.util.Locale.ENGLISH);
     DateTimeFormatter shortDay = DateTimeFormatter.ISO_LOCAL_DATE;
+    request.setAttribute("moNavActive", "calendar");
 %>
 <!DOCTYPE html>
 <html>
@@ -56,9 +57,12 @@
             </div>
             <%@ include file="/WEB-INF/jspf/mo-side-nav.jspf" %>
         </div>
-        <main class="main-panel mo-main">
-            <h1>Interview calendar</h1>
-            <p class="mo-page-lead">All <strong>Interview</strong> and <strong>Waitlist</strong> applications across your postings, grouped by booked slot time when available, or by the legacy per-applicant interview notice field otherwise. Dates <strong>before today</strong> are listed as expired; today and future appear as your to-do schedule.</p>
+        <main class="main-panel mo-main mo-page mo-page--mo-calendar">
+            <header class="ta-page-header">
+                <p class="ta-page-kicker">Schedule</p>
+                <h1>Interview calendar</h1>
+                <p class="ta-page-lead">All <strong>Interview</strong> and <strong>Waitlist</strong> applications across your postings, grouped by booked slot time when available, or by the legacy per-applicant interview notice field otherwise. Dates <strong>before today</strong> are listed as expired; today and future appear as your to-do schedule.</p>
+            </header>
 
             <div class="stats-row mo-cal-stats mo-cal-stats--three">
                 <div class="stat-card stat-card--todo">
@@ -209,8 +213,8 @@
             <% } %>
         </main>
         <aside class="right-sidebar">
-            <div class="widget-card">
-                <div class="widget-title">Tip</div>
+            <div class="widget-card ta-widget-card">
+                <div class="widget-title">Calendar tip</div>
                 <p class="widget-line">Use a clear leading date (<code>2026-04-09</code> or <code>2026-4-9</code>) so rows land on the calendar; past dates move to the expired section automatically.</p>
             </div>
         </aside>

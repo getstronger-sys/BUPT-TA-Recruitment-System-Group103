@@ -26,6 +26,7 @@
     int other = otherObj != null ? otherObj : 0;
     Boolean hidePi = (Boolean) request.getAttribute("hideApplicantPersonalInfo");
     boolean hidePersonal = hidePi != null && hidePi.booleanValue();
+    request.setAttribute("moNavActive", "jobs");
 %>
 <!DOCTYPE html>
 <html>

@@ -6,9 +6,10 @@
     }
     String moNavCtx = request.getContextPath();
 %>
-<aside class="side-nav">
-    <a class="<%= "jobs".equals(moNavActive) ? "active" : "" %>" href="<%= moNavCtx %>/mo/jobs">My Jobs</a>
-    <a class="<%= "post".equals(moNavActive) ? "active" : "" %>" href="<%= moNavCtx %>/mo/post-job">Post Job</a>
-    <a class="<%= "past".equals(moNavActive) ? "active" : "" %>" href="<%= moNavCtx %>/mo/past-jobs">Past postings</a>
-    <a class="<%= "calendar".equals(moNavActive) ? "active" : "" %>" href="<%= moNavCtx %>/mo/interview-calendar">Interview calendar</a>
+<aside class="side-nav side-nav--mo" role="navigation" aria-label="MO portal">
+    <p class="side-nav__brand">MO portal</p>
+    <a class="mo-nav-link mo-nav-link--jobs <%= "jobs".equals(moNavActive) ? "active" : "" %>" href="<%= moNavCtx %>/mo/jobs">My Jobs</a>
+    <a class="mo-nav-link mo-nav-link--post <%= "post".equals(moNavActive) ? "active" : "" %>" href="<%= moNavCtx %>/mo/post-job">Post Job</a>
+    <a class="mo-nav-link mo-nav-link--past <%= "past".equals(moNavActive) ? "active" : "" %>" href="<%= moNavCtx %>/mo/past-jobs">Past postings</a>
+    <a class="mo-nav-link mo-nav-link--calendar <%= "calendar".equals(moNavActive) ? "active" : "" %>" href="<%= moNavCtx %>/mo/interview-calendar">Interview calendar</a>
 </aside>

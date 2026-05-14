@@ -61,12 +61,15 @@
             </div>
             <%@ include file="/WEB-INF/jspf/mo-side-nav.jspf" %>
         </div>
-        <main class="main-panel mo-main">
+        <main class="main-panel mo-main mo-page mo-page--mo-jobs">
+            <% String err = request.getParameter("error");
+               boolean moJobsFlash = "1".equals(request.getParameter("success")) || "1".equals(request.getParameter("updated")) || "1".equals(request.getParameter("notice")) || err != null;
+               if (moJobsFlash) { %>
+            <div class="ta-page-flashes">
             <% if ("1".equals(request.getParameter("success"))) { %><p class="success">Job posted successfully!</p><% } %>
             <% if ("1".equals(request.getParameter("updated"))) { %><p class="success">Applicant status updated.</p><% } %>
             <% if ("1".equals(request.getParameter("notice"))) { %><p class="success">Interview notice saved (in-app message).</p><% } %>
-            <% String err = request.getParameter("error");
-               if (err != null) {
+            <% if (err != null) {
                    String errMsg = err;
                    if ("not_pending".equals(err)) errMsg = "Only pending applications can be moved to interview.";
                    else if ("not_interview".equals(err)) errMsg = "Only interview-stage applications can be selected.";
@@ -81,29 +84,33 @@
                    else if ("invalid_notice_time".equals(err)) errMsg = "Interview notice requires a valid date and time.";
                    else if ("reopen_deadline_required".equals(err)) errMsg = "The application deadline has passed. Enter a new deadline (today or later) to reopen this posting; it will return to My Jobs.";
             %><p class="error">Error: <%= errMsg %></p><% } %>
+            </div>
+            <% } %>
 
             <% if (moJobListMode) { %>
-            <h1><%= moPastJobsPage ? "Past postings" : "Your postings" %></h1>
-            <p class="mo-page-lead">
-                <%= moPastJobsPage
-                        ? "Review closed or expired postings for history and records."
-                        : "Choose one posting to manage applicants, interviews, and outcomes in a focused workflow." %>
-            </p>
-            <div class="context-card">
+            <header class="ta-page-header">
+                <p class="ta-page-kicker"><%= moPastJobsPage ? "History" : "Postings" %></p>
+                <h1><%= moPastJobsPage ? "Past postings" : "Your postings" %></h1>
+                <p class="ta-page-lead">
+                    <%= moPastJobsPage
+                            ? "Review closed or expired postings for history and records."
+                            : "Choose one posting to manage applicants, interviews, and outcomes in a focused workflow." %>
+                </p>
+            </header>
+            <div class="ta-panel ta-panel--tip">
+                <strong class="ta-panel__title"><%= moPastJobsPage ? "Closed or past deadline" : "One posting at a time" %></strong>
                 <% if (moPastJobsPage) { %>
-                <strong>Closed or past deadline</strong>
-                <p>These jobs were closed manually or are past the application deadline. Use this list for history only. Active recruitment is under <strong>My Jobs</strong> in the sidebar.</p>
+                <p class="ta-panel__body">These jobs were closed manually or are past the application deadline. Use this list for history only. Active recruitment is under <strong>My Jobs</strong> in the sidebar.</p>
                 <% } else { %>
-                <strong>One posting at a time</strong>
-                <p>Choose a job below to manage it. Applicants, interviewees, and progress are kept separate per posting and are not mixed in one list.</p>
+                <p class="ta-panel__body">Choose a job below to manage it. Applicants, interviewees, and progress are kept separate per posting and are not mixed in one list.</p>
                 <% } %>
             </div>
-            <div class="context-card">
-                <strong>Assigned modules this term</strong>
+            <div class="ta-panel">
+                <strong class="ta-panel__title">Assigned modules this term</strong>
                 <% if (assignedModules.isEmpty()) { %>
-                <p class="muted-inline">No modules assigned by admin yet. Contact admin before posting new jobs.</p>
+                <p class="ta-panel__lede muted-inline">No modules assigned by admin yet. Contact admin before posting new jobs.</p>
                 <% } else { %>
-                <p class="muted-inline">
+                <p class="ta-panel__lede muted-inline">
                     <% for (int i = 0; i < assignedModules.size(); i++) {
                            AssignedModule am = assignedModules.get(i);
                            if (am == null || am.getModuleCode() == null || am.getModuleCode().trim().isEmpty()) continue;
@@ -113,11 +120,13 @@
                 </p>
                 <% } %>
             </div>
+            <div class="mo-page-toolbar">
             <% if (moPastJobsPage) { %>
-            <p><a href="<%= moCtx %>/mo/jobs" class="btn btn-primary">Back to active postings</a></p>
+            <a href="<%= moCtx %>/mo/jobs" class="btn btn-primary">Back to active postings</a>
             <% } else { %>
-            <p><a href="<%= moCtx %>/mo/post-job" class="btn btn-primary">Post New Job</a></p>
+            <a href="<%= moCtx %>/mo/post-job" class="btn btn-primary">Post New Job</a>
             <% } %>
+            </div>
             <% if (moJobPickList.isEmpty()) { %>
             <p><%= moPastJobsPage ? "No closed or expired postings." : "You have not posted any jobs yet." %><% if (!moPastJobsPage) { %> <a href="<%= moCtx %>/mo/post-job">Post your first job</a>.<% } %></p>
             <% } else { %>
@@ -157,8 +166,13 @@
             <% } else { %>
             <p class="breadcrumb-row"><a href="<%= moBase %>" class="mini-link">&larr; Back to posting list</a></p>
             <% Job hdr = jobsWithApps.isEmpty() ? null : (Job) ((Object[]) jobsWithApps.get(0))[0]; %>
-            <h1><%= hdr != null ? escHtml(hdr.getTitle()) : "Job management" %></h1>
-            <% if (hdr != null) { %><p class="pick-meta"><%= escHtml(hdr.getModuleCode()) %> · <%= escHtml(hdr.getModuleName() != null ? hdr.getModuleName() : "") %></p>
+            <header class="ta-page-header">
+                <p class="ta-page-kicker">Manage posting</p>
+                <h1><%= hdr != null ? escHtml(hdr.getTitle()) : "Job management" %></h1>
+                <% if (hdr != null) { %><p class="pick-meta"><%= escHtml(hdr.getModuleCode()) %> · <%= escHtml(hdr.getModuleName() != null ? hdr.getModuleName() : "") %></p><% } %>
+                <p class="ta-page-lead">Manage one posting end-to-end: screen applicants, send interview notices, and record final outcomes.</p>
+            </header>
+            <% if (hdr != null) { %>
             <div class="context-card mo-posting-detail-card">
                 <strong>Full posting (all fields from the publish form)</strong>
                 <p class="muted-inline">Description, responsibilities, pay, deadline, skills, hours, timeline, interview info, planned recruits, and waitlist settings are listed on one page.</p>
@@ -167,7 +181,6 @@
                 </p>
             </div>
             <% } %>
-            <p class="mo-page-lead">Manage one posting end-to-end: screen applicants, send interview notices, and record final outcomes.</p>
             <% if (hdr != null) {
                    int plannedRecruits = hdr.getTaSlots() > 0 ? hdr.getTaSlots() : 1;
                    WorkQuotaPlanner.Recommendation quotaRec = WorkQuotaPlanner.recommend(hdr.getWorkArrangements(), plannedRecruits);

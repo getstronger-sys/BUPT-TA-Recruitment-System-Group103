@@ -19,6 +19,7 @@
                 java.util.Collections.emptyList()
         );
     }
+    request.setAttribute("adminNavActive", "summary");
 %>
 <!DOCTYPE html>
 <html>
@@ -44,31 +45,33 @@
                 <div class="icon-dot">A</div>
                 <div class="icon-dot">U</div>
             </div>
-            <aside class="side-nav">
-                <a class="active" href="${pageContext.request.contextPath}/admin/dashboard">Summary</a>
-                <a href="${pageContext.request.contextPath}/admin/workload">Workload</a>
-                <a href="${pageContext.request.contextPath}/admin/monitoring">Monitoring</a>
-                <a href="${pageContext.request.contextPath}/admin/email">Email</a>
-                <a href="${pageContext.request.contextPath}/admin/ai-api">AI API</a>
-                <a href="${pageContext.request.contextPath}/admin/users">Users</a>
-            </aside>
+            <%@ include file="/WEB-INF/jspf/admin-side-nav.jspf" %>
         </div>
-        <main class="main-panel admin-main">
-            <h1>Recruitment Summary</h1>
-            <p class="ta-page-lead">Track the platform at a glance, configure workload rules, and jump into exception monitoring when something needs intervention.</p>
+        <main class="main-panel admin-main admin-page">
+            <header class="ta-page-header">
+                <p class="ta-page-kicker">Overview</p>
+                <h1>Recruitment Summary</h1>
+                <p class="ta-page-lead">Track the platform at a glance, configure workload rules, and jump into exception monitoring when something needs intervention.</p>
+            </header>
             <div class="context-card">
                 <strong>Admin scope</strong>
                 <p>This dashboard summarizes jobs, applications, system rules, and cross-role workload pressure for the whole recruitment process.</p>
             </div>
 
+            <% boolean adminDashFlash = "1".equals(request.getParameter("saved")) || request.getParameter("autoClosed") != null;
+               String adminDashErr = (String) request.getAttribute("error");
+               if (adminDashFlash || adminDashErr != null) { %>
+            <div class="ta-page-flashes">
             <% if ("1".equals(request.getParameter("saved"))) { %>
             <p class="success">Admin settings saved.</p>
             <% } %>
             <% if (request.getParameter("autoClosed") != null) { %>
             <p class="success">Pending applications auto-closed after applying the workload rule: <strong><%= request.getParameter("autoClosed") %></strong>.</p>
             <% } %>
-            <% String err = (String) request.getAttribute("error"); if (err != null) { %>
-            <p class="error"><%= escHtml(err) %></p>
+            <% if (adminDashErr != null) { %>
+            <p class="error"><%= escHtml(adminDashErr) %></p>
+            <% } %>
+            </div>
             <% } %>
 
             <div class="stats-row admin-stat-grid">
@@ -153,14 +156,14 @@
             </section>
         </main>
         <aside class="right-sidebar">
-            <div class="widget-card">
+            <div class="widget-card ta-widget-card">
                 <div class="widget-title">Monitoring Snapshot</div>
                 <p class="widget-line">Limit alerts: <%= monitoring.getLimitAlerts().size() %></p>
                 <p class="widget-line">Interview notice issues: <%= monitoring.getInterviewNoticeAlerts().size() %></p>
                 <p class="widget-line">Capacity issues: <%= monitoring.getCapacityAlerts().size() %></p>
                 <p class="widget-line"><a href="${pageContext.request.contextPath}/admin/users">Open user directory</a></p>
             </div>
-            <div class="widget-card">
+            <div class="widget-card ta-widget-card">
                 <div class="widget-title">Rule Reminder</div>
                 <p class="widget-line">Hour cap 0 with job cap 0 disables both caps.</p>
                 <p class="widget-line">Auto-close only affects pending applications, not interview-stage records.</p>

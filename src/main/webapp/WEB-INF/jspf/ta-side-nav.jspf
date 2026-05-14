@@ -8,11 +8,12 @@
     int taUnreadCount = taUnreadObj != null ? taUnreadObj : 0;
     String taCtx = request.getContextPath();
 %>
-<aside class="side-nav">
-    <a class="<%= "home".equals(taNavActive) ? "active" : "" %>" href="<%= taCtx %>/ta/dashboard">Home</a>
-    <a class="<%= "jobs".equals(taNavActive) ? "active" : "" %>" href="<%= taCtx %>/ta/jobs">Find Jobs</a>
-    <a class="<%= "saved".equals(taNavActive) ? "active" : "" %>" href="<%= taCtx %>/ta/saved-jobs">Saved Jobs</a>
-    <a class="<%= "applications".equals(taNavActive) ? "active" : "" %>" href="<%= taCtx %>/ta/applications">My Applications</a>
-    <a class="<%= "messages".equals(taNavActive) ? "active" : "" %> ta-nav-messages" href="<%= taCtx %>/ta/messages">Messages<% if (taUnreadCount > 0) { %><span class="nav-unread-badge" title="Unread notifications"><%= taUnreadCount > 99 ? "99+" : String.valueOf(taUnreadCount) %></span><% } %></a>
-    <a class="<%= "profile".equals(taNavActive) ? "active" : "" %>" href="<%= taCtx %>/ta/profile">My Profile</a>
+<aside class="side-nav side-nav--ta" role="navigation" aria-label="TA portal">
+    <p class="side-nav__brand">TA portal</p>
+    <a class="ta-nav-link ta-nav-link--home <%= "home".equals(taNavActive) ? "active" : "" %>" href="<%= taCtx %>/ta/dashboard">Home</a>
+    <a class="ta-nav-link ta-nav-link--jobs <%= "jobs".equals(taNavActive) ? "active" : "" %>" href="<%= taCtx %>/ta/jobs">Find Jobs</a>
+    <a class="ta-nav-link ta-nav-link--saved <%= "saved".equals(taNavActive) ? "active" : "" %>" href="<%= taCtx %>/ta/saved-jobs">Saved Jobs</a>
+    <a class="ta-nav-link ta-nav-link--applications <%= "applications".equals(taNavActive) ? "active" : "" %>" href="<%= taCtx %>/ta/applications">My Applications</a>
+    <a class="ta-nav-link ta-nav-link--messages <%= "messages".equals(taNavActive) ? "active" : "" %>" href="<%= taCtx %>/ta/messages"><span class="ta-nav-link__label">Messages</span><% if (taUnreadCount > 0) { %><span class="nav-unread-badge" title="Unread notifications"><%= taUnreadCount > 99 ? "99+" : String.valueOf(taUnreadCount) %></span><% } %></a>
+    <a class="ta-nav-link ta-nav-link--profile <%= "profile".equals(taNavActive) ? "active" : "" %>" href="<%= taCtx %>/ta/profile">My Profile</a>
 </aside>

@@ -1,7 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
 <% List<Object[]> workloadRows = (List<Object[]>) request.getAttribute("workloadRows"); if (workloadRows == null) workloadRows = java.util.Collections.emptyList();
-   Double avgWorkload = (Double) request.getAttribute("avgWorkload"); if (avgWorkload == null) avgWorkload = 0.0; %>
+   Double avgWorkload = (Double) request.getAttribute("avgWorkload"); if (avgWorkload == null) avgWorkload = 0.0;
+   request.setAttribute("adminNavActive", "workload"); %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -19,23 +20,29 @@
     <div class="page-layout">
         <div class="left-nav-wrap">
             <div class="icon-rail">
+                <div class="icon-dot">D</div>
                 <div class="icon-dot active">W</div>
+                <div class="icon-dot">M</div>
+                <div class="icon-dot">E</div>
+                <div class="icon-dot">A</div>
+                <div class="icon-dot">U</div>
             </div>
-            <aside class="side-nav">
-                <a class="active" href="${pageContext.request.contextPath}/admin/workload">TA Workload</a>
-            </aside>
+            <%@ include file="/WEB-INF/jspf/admin-side-nav.jspf" %>
         </div>
-        <main class="main-panel admin-main">
-    <h1>TA Overall Workload</h1>
-    <p class="ta-page-lead">Review selected-job distribution to keep workload fair across module assignments.</p>
-    <div class="context-card">
-        <strong>Admin tip</strong>
-        <p>Average selected jobs per TA: <strong><%= String.format("%.1f", avgWorkload) %></strong>. Prioritize lower-load TAs where possible.</p>
-    </div>
-    <p><a href="${pageContext.request.contextPath}/admin/export-workload" class="btn btn-primary">Export to CSV</a></p>
-    <p class="table-scroll-wrap-hint">Tip: swipe horizontally on narrow screens to view all columns.</p>
-    <div class="table-scroll-wrap">
-    <table class="admin-table">
+        <main class="main-panel admin-main admin-page">
+            <header class="ta-page-header">
+                <p class="ta-page-kicker">Workload</p>
+                <h1>TA Overall Workload</h1>
+                <p class="ta-page-lead">Review selected-job distribution to keep workload fair across module assignments.</p>
+            </header>
+            <div class="context-card">
+                <strong>Admin tip</strong>
+                <p>Average selected jobs per TA: <strong><%= String.format("%.1f", avgWorkload) %></strong>. Prioritize lower-load TAs where possible.</p>
+            </div>
+            <p><a href="${pageContext.request.contextPath}/admin/export-workload" class="btn btn-primary">Export to CSV</a></p>
+            <p class="table-scroll-wrap-hint">Tip: swipe horizontally on narrow screens to view all columns.</p>
+            <div class="table-scroll-wrap">
+            <table class="admin-table">
         <tr>
             <th>TA Name</th>
             <th>User ID</th>
@@ -62,10 +69,10 @@
         <tr><td colspan="5">No TA has been selected for any job yet.</td></tr>
         <% } %>
     </table>
-    </div>
+            </div>
         </main>
         <aside class="right-sidebar">
-            <div class="widget-card">
+            <div class="widget-card ta-widget-card">
                 <div class="widget-title">Balance Summary</div>
                 <p class="widget-line">Average selected jobs: <%= String.format("%.1f", avgWorkload) %></p>
                 <p class="widget-line">Use this panel for fairness checks.</p>

@@ -30,12 +30,22 @@
             </div>
             <%@ include file="/WEB-INF/jspf/ta-side-nav.jspf" %>
         </div>
-        <main class="main-panel ta-main">
-            <h1>Saved Jobs</h1>
-            <p class="ta-page-lead">Your shortlist is ordered by AI match score so the strongest-fit roles stay at the top.</p>
-            <div class="context-card">
-                <strong>Saved list</strong>
-                <p>You have <strong><%= savedCount %></strong> saved job<%= savedCount == 1 ? "" : "s" %>. Closed roles stay here until you remove them, so you can compare later.</p>
+        <main class="main-panel ta-main ta-page ta-page--saved">
+            <header class="ta-page-header">
+                <p class="ta-page-kicker">Shortlist</p>
+                <h1>Saved jobs</h1>
+                <p class="ta-page-lead">Your shortlist is ordered by AI match score so the strongest-fit roles stay at the top.</p>
+            </header>
+
+            <div class="ta-panel ta-panel--tip">
+                <strong class="ta-panel__title">Saved list</strong>
+                <p class="ta-panel__body">You have <strong><%= savedCount %></strong> saved job<%= savedCount == 1 ? "" : "s" %>. Closed roles stay here until you remove them, so you can compare later.</p>
+            </div>
+
+            <div class="ta-job-results ta-saved-results" aria-live="polite">
+            <div class="ta-results-head">
+                <h2 class="ta-results-title">Saved vacancies</h2>
+                <span class="ta-results-count"><%= jobsWithMatch.size() %> <%= jobsWithMatch.size() == 1 ? "role" : "roles" %></span>
             </div>
 
             <% for (Object[] row : jobsWithMatch) {
@@ -56,9 +66,6 @@
                 <p><%= escHtml(j.getDescription() != null ? j.getDescription() : "") %></p>
                 <% if (j.getWorkingHours() != null && !j.getWorkingHours().isEmpty()) { %>
                 <p><strong>Hours:</strong> <%= escHtml(j.getWorkingHours()) %></p>
-                <% } %>
-                <% if (j.getWorkload() != null && !j.getWorkload().isEmpty()) { %>
-                <p><strong>Workload:</strong> <%= escHtml(j.getWorkload()) %></p>
                 <% } %>
                 <% if (j.getDeadline() != null && !j.getDeadline().isEmpty()) { %>
                 <p class="job-list-deadline"><strong>Apply by:</strong> <%= escHtml(j.getDeadline()) %></p>
@@ -84,9 +91,10 @@
                if (jobsWithMatch.isEmpty()) { %>
             <p class="section-empty section-empty--card ta-empty">You have not saved any jobs yet. Browse <a href="${pageContext.request.contextPath}/ta/jobs">open roles</a> and save the ones you want to compare later.</p>
             <% } %>
+            </div>
         </main>
         <aside class="right-sidebar">
-            <div class="widget-card">
+            <div class="widget-card ta-widget-card">
                 <div class="widget-title">Sorting</div>
                 <p class="widget-line">Saved jobs are ranked by match score.</p>
                 <p class="widget-line">Open roles are kept ahead of closed ones when scores tie.</p>
