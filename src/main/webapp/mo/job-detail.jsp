@@ -118,12 +118,25 @@
             </div>
             <%@ include file="/WEB-INF/jspf/mo-side-nav.jspf" %>
         </div>
-        <main class="main-panel mo-main">
-            <p class="breadcrumb-line">
+        <main class="main-panel mo-main mo-page mo-page--mo-job-detail">
+            <p class="breadcrumb-row">
                 <a href="<%= moCtx %><%= moListPath %>">&larr; Back to posting list</a>
-                &nbsp;|&nbsp;
+                <span class="muted-inline"> &nbsp;|&nbsp; </span>
                 <a href="<%= manageHref %>">Manage applicants</a>
             </p>
+            <% String waErr = request.getParameter("error");
+               boolean moJobDetailFlash = "1".equals(request.getParameter("posted"))
+                       || "1".equals(request.getParameter("workArrangementsUpdated"))
+                       || "1".equals(request.getParameter("slotSaved"))
+                       || request.getParameter("slotError") != null
+                       || "wa_count_mismatch".equals(waErr)
+                       || "wa_ta_invalid".equals(waErr)
+                       || "planned_ta_invalid".equals(waErr)
+                       || "wa_confirm_required".equals(waErr)
+                       || "wa_validation".equals(waErr)
+                       || "wa_job_inactive".equals(waErr);
+               if (moJobDetailFlash) { %>
+            <div class="ta-page-flashes">
             <% if ("1".equals(request.getParameter("posted"))) { %>
             <p class="success">Posting saved. Everything below is the full text you entered (same fields TAs see, plus MO-only limits). When you are ready, open <a href="<%= manageHref %>">Manage applicants</a>.</p>
             <% } %>
@@ -133,21 +146,26 @@
             <% if ("1".equals(request.getParameter("slotSaved"))) { %>
             <p class="success">Interview slot updated successfully.</p>
             <% } %>
-            <% String waErr = request.getParameter("error");
-               if ("wa_count_mismatch".equals(waErr)) { %><p class="error">Could not update work arrangements (form mismatch). Please try again.</p><% }
+            <% if ("wa_count_mismatch".equals(waErr)) { %><p class="error">Could not update work arrangements (form mismatch). Please try again.</p><% }
                else if ("wa_ta_invalid".equals(waErr)) { %><p class="error">Each row needs at least 1 TA.</p><% }
                else if ("planned_ta_invalid".equals(waErr)) { %><p class="error">Planned recruits must be at least 1.</p><% }
                else if ("wa_confirm_required".equals(waErr)) { %><p class="error">Please tick both confirmation boxes before saving changes to work arrangements.</p><% }
                else if ("wa_validation".equals(waErr)) { %><p class="error">Fix work arrangement rows: each needs a name, per-session duration, occurrences (≥1), and TA count (≥1).</p><% }
                else if ("wa_job_inactive".equals(waErr)) { %><p class="error">This posting is closed or past deadline; work arrangements cannot be edited here.</p><% } %>
             <% if (request.getParameter("slotError") != null) { %><p class="error"><%= escHtml(request.getParameter("slotError")) %></p><% } %>
-            <h1><%= safeTitle %></h1>
-            <p class="job-detail-meta">
-                <span class="status-pill <%= isOpen ? "status-pill-pending" : "status-pill-rejected" %>"><%= escHtml(job.getStatus()) %></span>
-                <% if (job.getJobType() != null && !job.getJobType().isEmpty()) { %>
-                <span class="muted-inline">Type: <%= "MODULE_TA".equals(job.getJobType()) ? "Module TA" : "INVIGILATION".equals(job.getJobType()) ? "Invigilation" : "Other" %></span>
-                <% } %>
-            </p>
+            </div>
+            <% } %>
+            <header class="ta-page-header">
+                <p class="ta-page-kicker">Posting detail</p>
+                <h1><%= safeTitle %></h1>
+                <p class="job-detail-meta">
+                    <span class="status-pill <%= isOpen ? "status-pill-pending" : "status-pill-rejected" %>"><%= escHtml(job.getStatus()) %></span>
+                    <% if (job.getJobType() != null && !job.getJobType().isEmpty()) { %>
+                    <span class="muted-inline">Type: <%= "MODULE_TA".equals(job.getJobType()) ? "Module TA" : "INVIGILATION".equals(job.getJobType()) ? "Invigilation" : "Other" %></span>
+                    <% } %>
+                </p>
+                <p class="ta-page-lead">Full text of this vacancy (what TAs see), plus MO tools below for work arrangements, interview slots, and candidate ranking when you manage the posting.</p>
+            </header>
 
             <section class="ta-job-detail__section" aria-labelledby="mo-job-decision-title">
                 <h2 id="mo-job-decision-title" class="ta-job-detail__heading">Candidate decision board</h2>

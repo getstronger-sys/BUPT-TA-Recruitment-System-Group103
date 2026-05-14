@@ -16,6 +16,7 @@
     TAProfile profile = report.getProfile();
     String displayName = user.getRealName() != null && !user.getRealName().trim().isEmpty() ? user.getRealName().trim()
             : (user.getUsername() != null && !user.getUsername().trim().isEmpty() ? user.getUsername().trim() : user.getId());
+    request.setAttribute("adminNavActive", "users");
 %>
 <!DOCTYPE html>
 <html>
@@ -41,19 +42,15 @@
                 <div class="icon-dot">A</div>
                 <div class="icon-dot active">U</div>
             </div>
-            <aside class="side-nav">
-                <a href="${pageContext.request.contextPath}/admin/dashboard">Summary</a>
-                <a href="${pageContext.request.contextPath}/admin/workload">Workload</a>
-                <a href="${pageContext.request.contextPath}/admin/monitoring">Monitoring</a>
-                <a href="${pageContext.request.contextPath}/admin/email">Email</a>
-                <a href="${pageContext.request.contextPath}/admin/ai-api">AI API</a>
-                <a class="active" href="${pageContext.request.contextPath}/admin/users">Users</a>
-            </aside>
+            <%@ include file="/WEB-INF/jspf/admin-side-nav.jspf" %>
         </div>
-        <main class="main-panel admin-main">
+        <main class="main-panel admin-main admin-page">
             <p class="breadcrumb-line"><a href="${pageContext.request.contextPath}/admin/users">&larr; Back to user directory</a></p>
-            <h1>TA Detail: <%= escHtml(displayName) %></h1>
-            <p class="ta-page-lead">Read-only traceability for this TA account (profile, saved jobs, applications, interviews, notifications). Use it to audit submissions, timestamps, status changes, and system messages—nothing here is editable.</p>
+            <header class="ta-page-header">
+                <p class="ta-page-kicker">User detail</p>
+                <h1>TA Detail: <%= escHtml(displayName) %></h1>
+                <p class="ta-page-lead">Read-only traceability for this TA account (profile, saved jobs, applications, interviews, notifications). Use it to audit submissions, timestamps, status changes, and system messages—nothing here is editable.</p>
+            </header>
 
             <div class="stats-row admin-stat-grid">
                 <div class="stat-card">
@@ -297,13 +294,13 @@
             </details>
         </main>
         <aside class="right-sidebar">
-            <div class="widget-card">
+            <div class="widget-card ta-widget-card">
                 <div class="widget-title">TA Snapshot</div>
                 <p class="widget-line">Selected: <%= report.getSelectedCount() %></p>
                 <p class="widget-line">Pending: <%= report.getPendingCount() %> | Interview: <%= report.getInterviewCount() %></p>
                 <p class="widget-line">Waitlist: <%= report.getWaitlistCount() %> | Withdrawn: <%= report.getWithdrawnCount() %></p>
             </div>
-            <div class="widget-card">
+            <div class="widget-card ta-widget-card">
                 <div class="widget-title">Quick Links</div>
                 <p class="widget-line"><a href="${pageContext.request.contextPath}/admin/users">Back to user directory</a></p>
                 <p class="widget-line"><a href="${pageContext.request.contextPath}/admin/workload">Review workload</a></p>

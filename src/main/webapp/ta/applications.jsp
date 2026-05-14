@@ -77,18 +77,30 @@
             </div>
             <%@ include file="/WEB-INF/jspf/ta-side-nav.jspf" %>
         </div>
-        <main class="main-panel ta-main">
-            <h1>My Applications</h1>
-            <div class="context-card">
-                <strong>How it works</strong>
-                <p>Pending &rarr; Interview (book a slot if the module organiser opens one) &rarr; Selected or rejected. Interview notices stay in-app, and email reminders can be enabled by system configuration.</p>
-            </div>
+        <main class="main-panel ta-main ta-page ta-page--applications">
+            <header class="ta-page-header">
+                <p class="ta-page-kicker">Tracking</p>
+                <h1>My applications</h1>
+                <p class="ta-page-lead">Follow each submission from pending to outcome. Book interview slots when the module organiser opens them.</p>
+            </header>
+
+            <% boolean taAppFlash = "1".equals(request.getParameter("success")) || "1".equals(request.getParameter("withdrawn"))
+                    || "already_processed".equals(request.getParameter("error")) || "not_found".equals(request.getParameter("error"));
+               if (taAppFlash) { %>
+            <div class="ta-page-flashes">
             <% if ("1".equals(request.getParameter("success"))) { %><p class="success">Application submitted successfully!</p><% } %>
             <% if ("1".equals(request.getParameter("withdrawn"))) { %><p class="success">Application withdrawn.</p><% } %>
             <% if ("already_processed".equals(request.getParameter("error"))) { %><p class="error">Cannot withdraw - already processed.</p><% } %>
             <% if ("not_found".equals(request.getParameter("error"))) { %><p class="error">Application not found.</p><% } %>
+            </div>
+            <% } %>
 
-            <div class="stats-row">
+            <div class="ta-panel ta-panel--tip">
+                <strong class="ta-panel__title">How it works</strong>
+                <p class="ta-panel__body">Pending &rarr; Interview (book a slot if the module organiser opens one) &rarr; Selected or rejected. Interview notices stay in-app, and email reminders can be enabled by system configuration.</p>
+            </div>
+
+            <div class="stats-row ta-dash-stats ta-dash-stats--v2 ta-apps-stats">
                 <div class="stat-card">
                     <div class="stat-icon">T</div>
                     <div>
@@ -97,13 +109,19 @@
                     </div>
                 </div>
                 <div class="stat-card">
+                    <div class="stat-icon stat-icon--muted">S</div>
                     <div>
-                        <div class="stat-title">Status Overview</div>
+                        <div class="stat-title">Status overview</div>
                         <div class="stat-meta">Selected <%= selectedCount %> | Pending <%= pendingCount %> | Interview <%= interviewCount %> | Closed <%= rejectedCount %></div>
                     </div>
                 </div>
             </div>
 
+            <div class="ta-apps-table-section">
+            <div class="ta-results-head ta-results-head--table">
+                <h2 class="ta-results-title">Application records</h2>
+                <span class="ta-results-count"><%= applications.size() %> <%= applications.size() == 1 ? "entry" : "entries" %></span>
+            </div>
             <p class="applications-table-hint muted-inline">Swipe or drag the bar below to see all columns if the table is wide.</p>
             <div class="applications-table-scroll">
             <table class="applications-table">
@@ -241,14 +259,15 @@
                 <% } %>
             </table>
             </div>
+            </div>
         </main>
         <aside class="right-sidebar">
-            <div class="widget-card">
+            <div class="widget-card ta-widget-card">
                 <div class="widget-title">TA Points</div>
                 <p class="widget-line">Current: <%= points %></p>
                 <p class="widget-line">Selected: <%= selectedCount %> | Pending: <%= pendingCount %> | Interview: <%= interviewCount %></p>
             </div>
-            <div class="widget-card">
+            <div class="widget-card ta-widget-card">
                 <div class="widget-title">Reminders</div>
                 <p class="widget-line">Pending applications can be withdrawn.</p>
                 <p class="widget-line">Processed records are archived.</p>

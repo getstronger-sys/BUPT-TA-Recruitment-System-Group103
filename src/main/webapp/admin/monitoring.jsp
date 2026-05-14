@@ -21,6 +21,7 @@
                 java.util.Collections.emptyList()
         );
     }
+    request.setAttribute("adminNavActive", "monitoring");
 %>
 <!DOCTYPE html>
 <html>
@@ -46,28 +47,35 @@
                 <div class="icon-dot">A</div>
                 <div class="icon-dot">U</div>
             </div>
-            <aside class="side-nav">
-                <a href="${pageContext.request.contextPath}/admin/dashboard">Summary</a>
-                <a href="${pageContext.request.contextPath}/admin/workload">Workload</a>
-                <a class="active" href="${pageContext.request.contextPath}/admin/monitoring">Monitoring</a>
-                <a href="${pageContext.request.contextPath}/admin/email">Email</a>
-                <a href="${pageContext.request.contextPath}/admin/ai-api">AI API</a>
-                <a href="${pageContext.request.contextPath}/admin/users">Users</a>
-            </aside>
+            <%@ include file="/WEB-INF/jspf/admin-side-nav.jspf" %>
         </div>
-        <main class="main-panel admin-main">
-            <h1>Application Monitoring</h1>
-            <p class="ta-page-lead">Review exception cases that may need admin attention: workload-rule conflicts, incomplete interview notices, inactive-job activity, and job capacity problems.</p>
-            <div class="context-card">
+        <main class="main-panel admin-main admin-page">
+            <header class="ta-page-header">
+                <p class="ta-page-kicker">Health</p>
+                <h1>Application Monitoring</h1>
+                <p class="ta-page-lead">Review exception cases that may need admin attention: workload-rule conflicts, incomplete interview notices, inactive-job activity, and job capacity problems.</p>
+            </header>
+            <div class="context-card admin-workload-rule">
                 <strong>Current workload rule</strong>
-                <p>Limit: <%= settings.hasWorkloadLimit() ? settings.getMaxSelectedJobsPerTa() : 0 %> selected jobs per TA. Auto-close pending: <strong><%= settings.isAutoClosePendingWhenLimitReached() ? "ON" : "OFF" %></strong>.</p>
+                <dl class="admin-workload-rule__list">
+                    <div class="admin-workload-rule__row">
+                        <dt>Max selected jobs per TA</dt>
+                        <dd><%= settings.hasWorkloadLimit() ? settings.getMaxSelectedJobsPerTa() : 0 %></dd>
+                    </div>
+                    <div class="admin-workload-rule__row">
+                        <dt>Auto-close pending</dt>
+                        <dd><%= settings.isAutoClosePendingWhenLimitReached() ? "ON" : "OFF" %></dd>
+                    </div>
+                </dl>
             </div>
             <% if ("1".equals(request.getParameter("remindDone"))) { %>
+            <div class="ta-page-flashes">
             <% if ("1".equals(request.getParameter("remindConfigured"))) { %>
             <p class="success">Unread reminder emails processed. Attempted: <strong><%= escHtml(request.getParameter("remindAttempted")) %></strong>, sent: <strong><%= escHtml(request.getParameter("remindSent")) %></strong>, skipped: <strong><%= escHtml(request.getParameter("remindSkipped")) %></strong>.</p>
             <% } else { %>
             <p class="error">Unread reminders were not sent because SMTP email is not configured yet.</p>
             <% } %>
+            </div>
             <% } %>
 
             <section class="detail-card">
@@ -285,7 +293,7 @@
             </section>
         </main>
         <aside class="right-sidebar">
-            <div class="widget-card">
+            <div class="widget-card ta-widget-card">
                 <div class="widget-title">Admin Actions</div>
                 <p class="widget-line"><a href="${pageContext.request.contextPath}/admin/dashboard">Adjust workload settings</a></p>
                 <p class="widget-line"><a href="${pageContext.request.contextPath}/admin/workload">Review TA distribution</a></p>

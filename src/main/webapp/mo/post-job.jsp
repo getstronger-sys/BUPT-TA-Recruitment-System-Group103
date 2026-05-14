@@ -68,18 +68,24 @@
             </div>
             <%@ include file="/WEB-INF/jspf/mo-side-nav.jspf" %>
         </div>
-        <main class="main-panel mo-main">
-    <h1>Post a New Job</h1>
-    <nav class="mo-post-anchor-nav" aria-label="Post job section shortcuts">
-        <a href="#post-basic">Basic info</a>
-        <a href="#post-work-arrangements">Work arrangements</a>
-        <a href="#post-recruitment">Recruitment setup</a>
-        <a href="#post-submit">Submit</a>
-    </nav>
-    <% String err = (String) request.getAttribute("error"); if (err != null) { %>
-    <p class="error"><%= escHtml(err) %></p>
-    <% } %>
-    <form action="${pageContext.request.contextPath}/mo/post-job" method="post" class="form form--mo-post">
+        <main class="main-panel mo-main mo-page mo-page--mo-post">
+            <header class="ta-page-header">
+                <p class="ta-page-kicker">New posting</p>
+                <h1>Post a New Job</h1>
+                <p class="ta-page-lead">Publish a vacancy for an admin-assigned module. Use section links below to jump the form; save as a <strong>template</strong> to reuse later.</p>
+            </header>
+            <% String err = (String) request.getAttribute("error"); if (err != null) { %>
+            <div class="ta-page-flashes">
+                <p class="error"><%= escHtml(err) %></p>
+            </div>
+            <% } %>
+            <nav class="mo-post-anchor-nav" aria-label="Post job section shortcuts">
+                <a href="#post-basic">Basic info</a>
+                <a href="#post-work-arrangements">Work arrangements</a>
+                <a href="#post-recruitment">Recruitment setup</a>
+                <a href="#post-submit">Submit</a>
+            </nav>
+            <form action="${pageContext.request.contextPath}/mo/post-job" method="post" class="form form--mo-post">
         <%@ include file="/WEB-INF/jspf/csrf-hidden.jspf" %>
         <div id="post-basic" class="mo-post-section-anchor"></div>
         <h2 class="mo-post-section-title">Basic information</h2>
@@ -250,8 +256,8 @@
     </form>
         </main>
         <aside class="right-sidebar">
-            <div class="context-card mo-post-side-card mo-post-checklist-card">
-                <strong>Posting checklist</strong>
+            <div class="widget-card ta-widget-card mo-post-side-card mo-post-checklist-card">
+                <div class="widget-title">Posting checklist</div>
                 <ul class="mo-side-list">
                     <li>Fields marked * are required.</li>
                     <li>Deadline must be YYYY-MM-DD and not in the past.</li>
@@ -259,8 +265,8 @@
                     <li>Set a fixed planned recruits count.</li>
                 </ul>
             </div>
-            <div class="context-card mo-post-side-card mo-post-template-card">
-                <strong>Reusable templates</strong>
+            <div class="widget-card ta-widget-card mo-post-side-card mo-post-template-card">
+                <div class="widget-title">Reusable templates</div>
                 <ul class="mo-side-list">
                     <li>Load a saved template to prefill fields.</li>
                     <li>Adjust only what changed.</li>

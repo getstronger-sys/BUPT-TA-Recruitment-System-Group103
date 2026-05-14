@@ -8,6 +8,7 @@
                 0, 0, 0, 0, "ALL", "", java.util.Collections.emptyList()
         );
     }
+    request.setAttribute("adminNavActive", "users");
 %>
 <!DOCTYPE html>
 <html>
@@ -33,27 +34,24 @@
                 <div class="icon-dot">A</div>
                 <div class="icon-dot active">U</div>
             </div>
-            <aside class="side-nav">
-                <a href="${pageContext.request.contextPath}/admin/dashboard">Summary</a>
-                <a href="${pageContext.request.contextPath}/admin/workload">Workload</a>
-                <a href="${pageContext.request.contextPath}/admin/monitoring">Monitoring</a>
-                <a href="${pageContext.request.contextPath}/admin/email">Email</a>
-                <a href="${pageContext.request.contextPath}/admin/ai-api">AI API</a>
-                <a class="active" href="${pageContext.request.contextPath}/admin/users">Users</a>
-            </aside>
+            <%@ include file="/WEB-INF/jspf/admin-side-nav.jspf" %>
         </div>
-        <main class="main-panel admin-main">
-            <h1>User Directory</h1>
-            <p class="ta-page-lead">Review all TA, MO, and admin accounts in one place, then open complete detail pages for read-only traceability.</p>
+        <main class="main-panel admin-main admin-page">
+            <header class="ta-page-header">
+                <p class="ta-page-kicker">Directory</p>
+                <h1>User Directory</h1>
+                <p class="ta-page-lead">Review all TA, MO, and admin accounts in one place, then open complete detail pages for read-only traceability.</p>
+            </header>
             <div class="context-card">
                 <strong>Admin view</strong>
                 <p>This page is read-only. Use it to cross-check roles, contact information, workload signals, and role-specific activity before opening the full TA or MO detail view.</p>
             </div>
 
-            <% if ("invalid_ta".equals(request.getParameter("error"))) { %>
-            <p class="error">The requested TA record was not found.</p>
-            <% } else if ("invalid_mo".equals(request.getParameter("error"))) { %>
-            <p class="error">The requested MO record was not found.</p>
+            <% if ("invalid_ta".equals(request.getParameter("error")) || "invalid_mo".equals(request.getParameter("error"))) { %>
+            <div class="ta-page-flashes">
+            <% if ("invalid_ta".equals(request.getParameter("error"))) { %><p class="error">The requested TA record was not found.</p><% } %>
+            <% if ("invalid_mo".equals(request.getParameter("error"))) { %><p class="error">The requested MO record was not found.</p><% } %>
+            </div>
             <% } %>
 
             <section class="detail-card">
@@ -182,13 +180,13 @@
             </section>
         </main>
         <aside class="right-sidebar">
-            <div class="widget-card">
+            <div class="widget-card ta-widget-card">
                 <div class="widget-title">Directory Tips</div>
                 <p class="widget-line">Search supports username, real name, email, student ID, and programme.</p>
                 <p class="widget-line">Open TA detail for profile, applications, saved jobs, and notification history.</p>
                 <p class="widget-line">Open MO detail for posting history, capacity, and applicant handling.</p>
             </div>
-            <div class="widget-card">
+            <div class="widget-card ta-widget-card">
                 <div class="widget-title">Quick Links</div>
                 <p class="widget-line"><a href="${pageContext.request.contextPath}/admin/dashboard">Summary dashboard</a></p>
                 <p class="widget-line"><a href="${pageContext.request.contextPath}/admin/workload">TA workload</a></p>

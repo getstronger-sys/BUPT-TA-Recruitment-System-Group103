@@ -93,25 +93,38 @@
             </div>
             <%@ include file="/WEB-INF/jspf/ta-side-nav.jspf" %>
         </div>
-        <main class="main-panel ta-main">
-            <p class="breadcrumb-line"><a href="${pageContext.request.contextPath}/ta/jobs">&larr; Back to job list</a></p>
-            <h1><%= safeTitle %></h1>
-            <p class="job-detail-meta">
-                <span class="status-pill <%= isOpen ? "status-pill-pending" : "status-pill-rejected" %>"><%= job.getStatus() %></span>
-                <% if (job.getJobType() != null && !job.getJobType().isEmpty()) { %>
-                <span class="muted-inline">Type: <%= "MODULE_TA".equals(job.getJobType()) ? "Module TA" : "INVIGILATION".equals(job.getJobType()) ? "Invigilation" : "Other" %></span>
-                <% } %>
-            </p>
-
-            <% if (match != null) { %>
-            <p class="ai-hint"><span class="match-badge" title="<%= escHtml(match.explanation) %>">Your match: <%= (int) match.score %>%</span>
-                <% if (match.matched != null && !match.matched.isEmpty()) { %> · Matched: <%= escHtml(String.join(", ", match.matched)) %><% } %>
-            </p>
-            <% } %>
+        <main class="main-panel ta-main ta-page ta-page--job-detail">
+            <header class="ta-job-detail-hero">
+                <p class="breadcrumb-line ta-job-detail-breadcrumb"><a href="${pageContext.request.contextPath}/ta/jobs">&larr; Back to job list</a></p>
+                <div class="ta-job-detail-hero__main">
+                    <p class="ta-page-kicker ta-job-detail-kicker">Vacancy</p>
+                    <h1><%= safeTitle %></h1>
+                    <p class="job-detail-meta">
+                        <span class="status-pill <%= isOpen ? "status-pill-pending" : "status-pill-rejected" %>"><%= job.getStatus() %></span>
+                        <% if (job.getJobType() != null && !job.getJobType().isEmpty()) { %>
+                        <span class="muted-inline">Type: <%= "MODULE_TA".equals(job.getJobType()) ? "Module TA" : "INVIGILATION".equals(job.getJobType()) ? "Invigilation" : "Other" %></span>
+                        <% } %>
+                    </p>
+                    <% if (match != null) { %>
+                    <div class="ta-job-match-strip" role="region" aria-label="Skill match summary">
+                        <div class="ta-job-match-strip__row">
+                            <span class="ta-job-match-strip__label">Your match</span>
+                            <span class="ta-job-match-pill match-badge" title="<%= escHtml(match.explanation) %>"><%= (int) match.score %>%</span>
+                        </div>
+                        <% if (match.matched != null && !match.matched.isEmpty()) { %>
+                        <p class="ta-job-match-strip__detail ta-job-match-strip__detail--ok muted-inline"><strong>Aligned skills:</strong> <%= escHtml(String.join(", ", match.matched)) %></p>
+                        <% } %>
+                        <% if (match.missing != null && !match.missing.isEmpty()) { %>
+                        <p class="ta-job-match-strip__detail ta-job-match-strip__detail--gap muted-inline"><strong>Gaps vs posting:</strong> <%= escHtml(String.join(", ", match.missing)) %></p>
+                        <% } %>
+                    </div>
+                    <% } %>
+                </div>
+            </header>
             <% if (Boolean.TRUE.equals(request.getAttribute("llmEnabled"))) { %>
-            <div class="llm-insight-card context-card" data-match-insight data-job-id="<%= escHtml(job.getId()) %>">
-                <strong>AI match insight (DeepSeek)</strong>
-                <p class="muted-inline">Click to generate a short narrative about strengths, gaps, and practical fit. The rule-based score above is not affected.</p>
+            <div class="ta-panel ta-panel--tip ta-job-llm-panel llm-insight-card" data-match-insight data-job-id="<%= escHtml(job.getId()) %>">
+                <strong class="ta-panel__title">AI match insight (DeepSeek)</strong>
+                <p class="ta-panel__body muted-inline">Optional narrative on strengths, gaps, and practical fit. The rule-based score in the header is unchanged.</p>
                 <div class="ai-summary-actions">
                     <button type="button" class="btn btn-secondary btn-sm match-insight-btn">Generate AI insight</button>
                 </div>
@@ -125,6 +138,7 @@
             <section class="ta-job-detail__section" aria-labelledby="ta-job-wa-title">
             <h2 id="ta-job-wa-title" class="ta-job-detail__heading">Work arrangements</h2>
             <p class="ta-job-detail__lede muted-inline">Concrete duties, durations, occurrences, and how many TAs share each line.</p>
+            <div class="ta-wa-table-wrap">
             <table class="job-wa-table">
                 <thead>
                 <tr>
@@ -153,6 +167,7 @@
                 <% } %>
                 </tbody>
             </table>
+            </div>
             </section>
             <% } %>
 
@@ -311,7 +326,7 @@
 
             <% if (isOpen) { %>
             <section class="ta-job-detail__section ta-job-detail__section--apply" aria-labelledby="ta-job-apply-title">
-            <div class="job-detail-apply">
+            <div class="job-detail-apply ta-apply-panel">
                 <h2 id="ta-job-apply-title">Apply for this position</h2>
                 <p class="muted-inline">Review the job details above, then continue to confirm what will be shared from your profile and CV.</p>
                 <p><a href="${pageContext.request.contextPath}/ta/apply-confirm?jobId=<%= escHtml(job.getId()) %>" class="btn btn-primary btn-lg">Review and apply</a></p>
@@ -324,7 +339,7 @@
             </div>
         </main>
         <aside class="right-sidebar">
-            <div class="widget-card">
+            <div class="widget-card ta-widget-card">
                 <div class="widget-title">Before you apply</div>
                 <p class="widget-line">Check deadline and workload fit.</p>
                 <p class="widget-line"><a href="${pageContext.request.contextPath}/ta/profile">Update your skills</a> to improve match.</p>

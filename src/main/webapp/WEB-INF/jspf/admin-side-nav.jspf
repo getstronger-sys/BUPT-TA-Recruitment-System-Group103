@@ -1,0 +1,17 @@
+<%-- Admin sidebar: set request attribute "adminNavActive" to summary | workload | monitoring | email | ai | users before including. --%>
+<%
+    String adminNavActive = (String) request.getAttribute("adminNavActive");
+    if (adminNavActive == null) {
+        adminNavActive = "";
+    }
+    String adminNavCtx = request.getContextPath();
+%>
+<aside class="side-nav side-nav--admin" role="navigation" aria-label="Admin portal">
+    <p class="side-nav__brand">Admin</p>
+    <a class="admin-nav-link admin-nav-link--summary <%= "summary".equals(adminNavActive) ? "active" : "" %>" href="<%= adminNavCtx %>/admin/dashboard">Summary</a>
+    <a class="admin-nav-link admin-nav-link--workload <%= "workload".equals(adminNavActive) ? "active" : "" %>" href="<%= adminNavCtx %>/admin/workload">Workload</a>
+    <a class="admin-nav-link admin-nav-link--monitoring <%= "monitoring".equals(adminNavActive) ? "active" : "" %>" href="<%= adminNavCtx %>/admin/monitoring">Monitoring</a>
+    <a class="admin-nav-link admin-nav-link--email <%= "email".equals(adminNavActive) ? "active" : "" %>" href="<%= adminNavCtx %>/admin/email">Email</a>
+    <a class="admin-nav-link admin-nav-link--ai <%= "ai".equals(adminNavActive) ? "active" : "" %>" href="<%= adminNavCtx %>/admin/ai-api">AI API</a>
+    <a class="admin-nav-link admin-nav-link--users <%= "users".equals(adminNavActive) ? "active" : "" %>" href="<%= adminNavCtx %>/admin/users">Users</a>
+</aside>
