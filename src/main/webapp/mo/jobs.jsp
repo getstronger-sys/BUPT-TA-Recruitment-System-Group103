@@ -78,6 +78,7 @@
                    else if ("invalid_action".equals(err)) errMsg = "Invalid action.";
                    else if ("invalid_job".equals(err)) errMsg = "Invalid posting or access denied.";
                    else if ("job_inactive".equals(err)) errMsg = "This posting is closed or past deadline. Management actions are disabled.";
+                   else if ("invalid_notice_time".equals(err)) errMsg = "Interview notice requires a valid date and time.";
                    else if ("reopen_deadline_required".equals(err)) errMsg = "The application deadline has passed. Enter a new deadline (today or later) to reopen this posting; it will return to My Jobs.";
             %><p class="error">Error: <%= errMsg %></p><% } %>
 
@@ -481,10 +482,15 @@
                         <%@ include file="/WEB-INF/jspf/csrf-hidden.jspf" %>
                         <input type="hidden" name="action" value="sendNotice">
                         <input type="hidden" name="returnJobId" value="<%= j.getId() %>">
-                        <div class="notice-fields">
-                            <label>Interview time <input type="text" name="interviewTime" placeholder="e.g. 2026-04-10 14:00" class="note-input notice-input-wide"></label>
-                            <label>Location <input type="text" name="interviewLocation" placeholder="Room or online link" class="note-input notice-input-wide"></label>
-                            <label class="notice-label-block">Assessment <textarea name="interviewAssessment" rows="2" placeholder="Scope, format, etc." class="note-input notice-textarea"></textarea></label>
+                        <div class="notice-fields notice-fields--grid">
+                            <label class="notice-field">Interview date
+                                <input type="date" name="interviewDate" required class="note-input notice-input-wide">
+                            </label>
+                            <label class="notice-field">Interview time
+                                <input type="time" name="interviewClock" required class="note-input notice-input-wide">
+                            </label>
+                            <label class="notice-field notice-field--full">Location <input type="text" name="interviewLocation" placeholder="Room or online link" class="note-input notice-input-wide"></label>
+                            <label class="notice-field notice-field--full">Assessment <textarea name="interviewAssessment" rows="2" placeholder="Scope, format, etc." class="note-input notice-textarea"></textarea></label>
                         </div>
                     </form>
                     <p class="batch-toolbar">

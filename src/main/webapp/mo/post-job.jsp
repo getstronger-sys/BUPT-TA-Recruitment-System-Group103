@@ -5,6 +5,8 @@
 <%@ page import="bupt.ta.model.AssignedModule" %>
 <%@ page import="bupt.ta.model.JobTemplate" %>
 <%@ page import="bupt.ta.model.WorkArrangementItem" %>
+<%@ page import="bupt.ta.util.InterviewScheduleSupport" %>
+<%@ page import="bupt.ta.util.PaymentSupport" %>
 <%@ page import="bupt.ta.util.WorkArrangementSupport" %>
 <%!
     static String fv(javax.servlet.http.HttpServletRequest r, String key, String def) {
@@ -28,6 +30,16 @@
    int waDefaultPlannedTaCount = waRows.stream().mapToInt(WorkArrangementItem::getTaCount).sum();
    if (waDefaultPlannedTaCount < 1) waDefaultPlannedTaCount = 1;
    String fvPlannedTaCount = fv(request, "fvPlannedTaCount", "");
+   String fvInterviewSchedule = fv(request, "fvInterviewSchedule", "");
+   String fvInterviewDate = InterviewScheduleSupport.dateInputValue(fvInterviewSchedule);
+   String fvInterviewStart = InterviewScheduleSupport.startTimeInputValue(fvInterviewSchedule);
+   String fvInterviewEnd = InterviewScheduleSupport.endTimeInputValue(fvInterviewSchedule);
+   String fvPayment = fv(request, "fvPayment", "");
+   String fvPaymentAmount = PaymentSupport.amountInputValue(fvPayment);
+   String fvPaymentCurrency = PaymentSupport.currencyInputValue(fvPayment);
+   String fvPaymentRateType = PaymentSupport.rateTypeInputValue(fvPayment);
+   String[] paymentCurrencies = PaymentSupport.currencies();
+   String[] paymentRateTypes = PaymentSupport.rateTypes();
    List<AssignedModule> assignedModules = (List<AssignedModule>) request.getAttribute("assignedModules");
    if (assignedModules == null) assignedModules = java.util.Collections.emptyList();
    String[] weekdays = WorkArrangementSupport.weekdays();
@@ -190,11 +202,39 @@
         <label>Course timeline &amp; exam milestones *</label>
         <textarea name="examTimeline" required rows="4" placeholder="Week 1-3 onboarding; Week 4 quiz support; Week 8 mock exam; Week 12 final exam marking."><%= fva(request, "fvExamTimeline") %></textarea>
         <label>Estimated interview time *</label>
-        <input type="text" name="interviewSchedule" required placeholder="e.g. 2026-04-20 14:00-17:00 (15 min per candidate)" value="<%= fva(request, "fvInterviewSchedule") %>">
+        <div class="interview-time-controls">
+            <label class="structured-field">Date
+                <input type="date" name="interviewDate" required value="<%= escHtml(fvInterviewDate) %>" aria-label="Estimated interview date">
+            </label>
+            <label class="structured-field">Start time
+                <input type="time" name="interviewStartTime" required value="<%= escHtml(fvInterviewStart) %>" aria-label="Estimated interview start time">
+            </label>
+            <label class="structured-field">End time
+                <input type="time" name="interviewEndTime" required value="<%= escHtml(fvInterviewEnd) %>" aria-label="Estimated interview end time">
+            </label>
+        </div>
         <label>Estimated interview location *</label>
         <input type="text" name="interviewLocation" required placeholder="e.g. EECS Bldg Room 402 / Teams link" value="<%= fva(request, "fvInterviewLocation") %>">
         <label>Payment / compensation *</label>
-        <input type="text" name="payment" required placeholder="e.g. £15/hour; stipend amount" value="<%= fva(request, "fvPayment") %>">
+        <div class="payment-controls">
+            <label class="structured-field">Amount
+                <input type="number" name="paymentAmount" min="0.01" step="0.01" required inputmode="decimal" value="<%= escHtml(fvPaymentAmount) %>" placeholder="15">
+            </label>
+            <label class="structured-field">Currency
+                <select name="paymentCurrency" required>
+                    <% for (String currency : paymentCurrencies) { %>
+                    <option value="<%= escHtml(currency) %>" <%= currency.equals(fvPaymentCurrency) ? "selected" : "" %>><%= escHtml(currency) %></option>
+                    <% } %>
+                </select>
+            </label>
+            <label class="structured-field">Rate type
+                <select name="paymentRateType" required>
+                    <% for (String rateType : paymentRateTypes) { %>
+                    <option value="<%= escHtml(rateType) %>" <%= rateType.equals(fvPaymentRateType) ? "selected" : "" %>><%= escHtml(rateType) %></option>
+                    <% } %>
+                </select>
+            </label>
+        </div>
         <label>Application deadline * <span class="muted-inline">(YYYY-MM-DD)</span></label>
         <input type="date" name="deadline" required value="<%= fva(request, "fvDeadline") %>">
         <label>Required Skills * <span class="muted-inline">(comma-separated)</span></label>

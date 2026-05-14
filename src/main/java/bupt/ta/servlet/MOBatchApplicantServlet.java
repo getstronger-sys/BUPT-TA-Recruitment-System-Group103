@@ -5,6 +5,7 @@ import bupt.ta.model.Job;
 import bupt.ta.service.ApplicationTimelineService;
 import bupt.ta.service.StudentNotificationService;
 import bupt.ta.storage.DataStorage;
+import bupt.ta.util.InterviewNoticeTimeSupport;
 import bupt.ta.util.JobActivity;
 
 import javax.servlet.ServletException;
@@ -75,7 +76,18 @@ public class MOBatchApplicantServlet extends HttpServlet {
         }
 
         if ("sendNotice".equals(action)) {
-            String time = trim(req.getParameter("interviewTime"));
+            String time;
+            try {
+                time = InterviewNoticeTimeSupport.normalizeFromForm(
+                        req.getParameter("interviewDate"),
+                        req.getParameter("interviewClock"));
+            } catch (IllegalArgumentException ex) {
+                String jid = resolveReturnJobId(storage, idSet, returnJobId, moId);
+                Job jref = jid.isEmpty() ? null : storage.getJobById(jid);
+                String listPath = jref != null ? JobActivity.listPathFor(jref) : moListPath(storage, returnJobId, moId);
+                resp.sendRedirect(moJobsUrl(ctx, listPath, "interview", jid, "error=invalid_notice_time"));
+                return;
+            }
             String location = trim(req.getParameter("interviewLocation"));
             String assessment = trim(req.getParameter("interviewAssessment"));
             for (String appId : idSet) {

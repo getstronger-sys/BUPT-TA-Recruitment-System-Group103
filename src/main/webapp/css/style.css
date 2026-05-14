@@ -2612,6 +2612,33 @@ tr:hover { background: #f8f7ff; }
     gap: 8px;
     align-items: center;
 }
+.form.form--mo-post .interview-time-controls {
+    display: grid;
+    grid-template-columns: minmax(10rem, 1.2fr) minmax(7rem, 0.9fr) minmax(7rem, 0.9fr);
+    gap: 10px;
+    align-items: center;
+}
+.form.form--mo-post .payment-controls {
+    display: grid;
+    grid-template-columns: minmax(8rem, 1fr) minmax(7rem, 0.75fr) minmax(9rem, 1fr);
+    gap: 10px;
+    align-items: center;
+}
+.form.form--mo-post .structured-field {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    color: #31537b;
+    font-size: 0.84rem;
+    font-weight: 700;
+}
+.form.form--mo-post .structured-field input,
+.form.form--mo-post .structured-field select {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 400;
+    color: #1f2f45;
+}
 .form.form--mo-post .wa-edit-table__cell--actions {
     text-align: center;
     vertical-align: middle;

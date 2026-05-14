@@ -4,6 +4,8 @@ import bupt.ta.model.AssignedModule;
 import bupt.ta.model.Job;
 import bupt.ta.model.WorkArrangementItem;
 import bupt.ta.storage.DataStorage;
+import bupt.ta.util.InterviewScheduleSupport;
+import bupt.ta.util.PaymentSupport;
 import bupt.ta.util.WorkArrangementSupport;
 
 import javax.servlet.ServletException;
@@ -37,10 +39,16 @@ public class PostJobServlet extends HttpServlet {
         String moduleName = trim(req.getParameter("moduleName"));
         String description = trim(req.getParameter("description"));
         String responsibilities = trim(req.getParameter("responsibilities"));
-        String payment = trim(req.getParameter("payment"));
+        String paymentAmount = trim(req.getParameter("paymentAmount"));
+        String paymentCurrency = trim(req.getParameter("paymentCurrency"));
+        String paymentRateType = trim(req.getParameter("paymentRateType"));
+        String payment = "";
         String deadline = trim(req.getParameter("deadline"));
         String examTimeline = trim(req.getParameter("examTimeline"));
-        String interviewSchedule = trim(req.getParameter("interviewSchedule"));
+        String interviewDate = trim(req.getParameter("interviewDate"));
+        String interviewStartTime = trim(req.getParameter("interviewStartTime"));
+        String interviewEndTime = trim(req.getParameter("interviewEndTime"));
+        String interviewSchedule = "";
         String interviewLocation = trim(req.getParameter("interviewLocation"));
         String skillsStr = req.getParameter("skills");
         String maxApplicantsStr = req.getParameter("maxApplicants");
@@ -48,6 +56,8 @@ public class PostJobServlet extends HttpServlet {
         String jobType = req.getParameter("jobType");
         String postedBy = (String) req.getSession().getAttribute("userId");
         String postedByName = (String) req.getSession().getAttribute("realName");
+        DataStorage storage = new DataStorage(getServletContext());
+        List<AssignedModule> assignedModules = storage.loadAssignedModulesForMo(postedBy);
 
         if (postedByName == null) {
             postedByName = (String) req.getSession().getAttribute("username");
@@ -75,6 +85,21 @@ public class PostJobServlet extends HttpServlet {
         List<WorkArrangementItem> workRows = WorkArrangementSupport.parseWorkRowsFromRequest(req);
         String error = WorkArrangementSupport.validateWorkRowsForPosting(workRows);
         if (error == null) {
+            try {
+                interviewSchedule = InterviewScheduleSupport.normalizeFromForm(
+                        interviewDate, interviewStartTime, interviewEndTime);
+            } catch (IllegalArgumentException ex) {
+                error = ex.getMessage();
+            }
+        }
+        if (error == null) {
+            try {
+                payment = PaymentSupport.normalizeFromForm(paymentAmount, paymentCurrency, paymentRateType);
+            } catch (IllegalArgumentException ex) {
+                error = ex.getMessage();
+            }
+        }
+        if (error == null) {
             error = validateJobForm(title, moduleCode, moduleName, responsibilities, payment, deadline, examTimeline,
                     interviewSchedule, interviewLocation, skills, maxApplicants, plannedTaCount);
         }
@@ -83,6 +108,7 @@ public class PostJobServlet extends HttpServlet {
             repopulateForm(req, title, moduleCode, moduleName, description, responsibilities, payment, deadline,
                     examTimeline, interviewSchedule, interviewLocation, skillsStr, maxApplicantsStr, jobType, workRows,
                     req.getParameter("autoFillFromWaitlist") != null, plannedTaCountStr);
+            req.setAttribute("assignedModules", assignedModules);
             req.setAttribute("error", error);
             req.getRequestDispatcher("/mo/post-job.jsp").forward(req, resp);
             return;
@@ -108,8 +134,6 @@ public class PostJobServlet extends HttpServlet {
         job.setJobType(jobType != null && !jobType.isEmpty() ? jobType : "MODULE_TA");
         job.setAutoFillFromWaitlist(req.getParameter("autoFillFromWaitlist") != null);
 
-        DataStorage storage = new DataStorage(getServletContext());
-        List<AssignedModule> assignedModules = storage.loadAssignedModulesForMo(postedBy);
         String assignmentError = validateAssignedModule(moduleCode, moduleName, assignedModules);
         if (assignmentError != null) {
             repopulateForm(req, title, moduleCode, moduleName, description, responsibilities, payment, deadline,
