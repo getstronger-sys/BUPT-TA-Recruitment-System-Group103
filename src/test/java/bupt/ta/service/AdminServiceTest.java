@@ -22,6 +22,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+/** Unit tests for {@link AdminService} workload and reporting logic. */
 public class AdminServiceTest {
 
     private final AdminService adminService = new AdminService();

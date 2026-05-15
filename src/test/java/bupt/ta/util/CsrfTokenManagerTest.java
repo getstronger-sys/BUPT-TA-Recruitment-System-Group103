@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+/** Unit tests for {@link CsrfTokenManager}. */
 public class CsrfTokenManagerTest {
 
     @Test

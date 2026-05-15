@@ -9,6 +9,7 @@ import java.nio.file.Path;
 
 import static org.junit.Assert.*;
 
+/** Unit tests for {@link EmailOtpService}. */
 public class EmailOtpServiceTest {
 
     @Test

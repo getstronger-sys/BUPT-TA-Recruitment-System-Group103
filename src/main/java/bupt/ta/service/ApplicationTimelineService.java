@@ -21,6 +21,7 @@ public class ApplicationTimelineService {
     public static final String TYPE_WITHDRAWN = "WITHDRAWN";
     public static final String TYPE_AUTO_PROMOTED = "AUTO_PROMOTED";
 
+    /** Appends one timeline event for an application. */
     public void record(DataStorage storage, Application app, Job job,
                        String actorUserId, String actorName, String actorRole,
                        String eventType, String title, String detail,
@@ -43,6 +44,7 @@ public class ApplicationTimelineService {
         storage.addApplicationEvent(event);
     }
 
+    /** Records a {@link #TYPE_STATUS_CHANGED} timeline event. */
     public void recordStatusChange(DataStorage storage, Application app, Job job,
                                    String actorUserId, String actorName, String actorRole,
                                    String fromStatus, String toStatus, String detail) throws IOException {

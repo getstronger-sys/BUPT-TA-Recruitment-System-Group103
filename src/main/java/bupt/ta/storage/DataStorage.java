@@ -20,8 +20,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 /**
- * JSON file-based data storage. All data stored in simple text (JSON) files.
- * Thread-safe for concurrent access.
+ * Thread-safe JSON file persistence for users, jobs, applications, and related entities.
+ * <p>
+ * Data is stored under a {@code data/} directory, resolved from {@code TA_DATA_DIR} /
+ * {@code ta.data.dir}, the project tree, or the servlet context. The
+ * {@link #DataStorage(javax.servlet.ServletContext)} constructor seeds demo data when empty;
+ * {@link #DataStorage(String)} is intended for tests and does not seed.
  */
 public class DataStorage {
     private static final String DATA_DIR = "data";
@@ -47,6 +51,9 @@ public class DataStorage {
     private final boolean seedDemoData;
     private final ReentrantReadWriteLock lock;
 
+    /**
+     * @param ctx servlet context used to resolve the data directory
+     */
     public DataStorage(ServletContext ctx) {
         this.basePath = resolveServletBasePath(ctx);
         this.gson = new GsonBuilder().setPrettyPrinting().create();
@@ -55,6 +62,9 @@ public class DataStorage {
         ensureDataDir();
     }
 
+    /**
+     * @param baseDir parent directory; JSON files are stored in {@code baseDir/data}
+     */
     public DataStorage(String baseDir) {
         this.basePath = Paths.get(baseDir, DATA_DIR).toAbsolutePath().normalize();
         this.gson = new GsonBuilder().setPrettyPrinting().create();
@@ -631,11 +641,14 @@ public class DataStorage {
     }
 
     // ---- Users ----
+
+    /** Returns the user with the given username, or {@code null}. */
     public User findByUsername(String username) throws IOException {
         List<User> users = loadUsers();
         return users.stream().filter(u -> u.getUsername().equals(username)).findFirst().orElse(null);
     }
 
+    /** Returns the user with the given email (case-insensitive), or {@code null}. */
     public User findByEmail(String email) throws IOException {
         List<User> users = loadUsers();
         return users.stream()
@@ -644,15 +657,18 @@ public class DataStorage {
                 .orElse(null);
     }
 
+    /** Returns the user with the given id, or {@code null}. */
     public User findUserById(String id) throws IOException {
         List<User> users = loadUsers();
         return users.stream().filter(u -> u.getId().equals(id)).findFirst().orElse(null);
     }
 
+    /** Loads all users from {@code users.json}. */
     public List<User> loadUsers() throws IOException {
         return withReadLock(this::loadUsersUnlocked);
     }
 
+    /** Inserts or replaces a user by id. */
     public void saveUser(User user) throws IOException {
         withWriteLock(() -> {
             List<User> users = loadUsersUnlocked();
@@ -662,6 +678,7 @@ public class DataStorage {
         });
     }
 
+    /** Assigns a new id and appends a user. */
     public User addUser(User user) throws IOException {
         withWriteLock(() -> {
             List<User> users = loadUsersUnlocked();
@@ -675,6 +692,7 @@ public class DataStorage {
 
     // ---- Remember-me tokens (persistent login) ----
 
+    /** Creates a new remember-me token for the user and returns the raw cookie value. */
     public String issueRememberMeToken(String userId) throws IOException {
         lock.writeLock().lock();
         try {
@@ -699,6 +717,7 @@ public class DataStorage {
         return rawToken;
     }
 
+    /** Resolves a remember-me token to a user, or {@code null} if invalid or expired. */
     public User validateRememberMeToken(String rawToken) throws IOException {
         if (rawToken == null || rawToken.trim().isEmpty()) {
             return null;
@@ -723,6 +742,7 @@ public class DataStorage {
         return findUserById(match.getUserId());
     }
 
+    /** Invalidates a single remember-me token. */
     public void revokeRememberMeToken(String rawToken) throws IOException {
         if (rawToken == null || rawToken.trim().isEmpty()) {
             return;
@@ -737,6 +757,7 @@ public class DataStorage {
         });
     }
 
+    /** Invalidates all remember-me tokens for the given user. */
     public void revokeAllRememberMeTokensForUser(String userId) throws IOException {
         if (userId == null) {
             return;
@@ -771,14 +792,18 @@ public class DataStorage {
     }
 
     // ---- TA Profiles ----
+
+    /** Loads all TA profiles from {@code profiles.json}. */
     public List<TAProfile> loadProfiles() throws IOException {
         return withReadLock(this::loadProfilesUnlocked);
     }
 
+    /** Returns the profile for a user id, or {@code null}. */
     public TAProfile getProfileByUserId(String userId) throws IOException {
         return loadProfiles().stream().filter(p -> p.getUserId().equals(userId)).findFirst().orElse(null);
     }
 
+    /** Returns a profile by student id (case-insensitive), or {@code null}. */
     public TAProfile findProfileByStudentId(String studentId) throws IOException {
         return loadProfiles().stream()
                 .filter(p -> equalsIgnoreCaseTrimmed(p.getStudentId(), studentId))
@@ -786,6 +811,7 @@ public class DataStorage {
                 .orElse(null);
     }
 
+    /** Inserts or replaces a TA profile by user id. */
     public void saveProfile(TAProfile profile) throws IOException {
         if (profile.getSavedJobIds() == null) {
             profile.setSavedJobIds(new ArrayList<>());
@@ -798,6 +824,7 @@ public class DataStorage {
         });
     }
 
+    /** Returns an existing profile or a new in-memory profile (not persisted). */
     public TAProfile getOrCreateProfile(String userId) throws IOException {
         TAProfile profile = getProfileByUserId(userId);
         if (profile == null) {
@@ -808,11 +835,17 @@ public class DataStorage {
         return profile;
     }
 
+    /** Returns whether the TA has saved the given job. */
     public boolean isJobSaved(String userId, String jobId) throws IOException {
         TAProfile profile = getOrCreateProfile(userId);
         return profile.getSavedJobIds().contains(jobId);
     }
 
+    /**
+     * Adds or removes a saved job for the TA.
+     *
+     * @return {@code true} if the saved-job list changed
+     */
     public boolean setJobSaved(String userId, String jobId, boolean saved) throws IOException {
         final boolean[] changedRef = {false};
         withWriteLock(() -> {
@@ -869,14 +902,17 @@ public class DataStorage {
         });
     }
 
+    /** Loads all job postings from {@code jobs.json}. */
     public List<Job> loadJobs() throws IOException {
         return withReadLock(this::loadJobsUnlocked);
     }
 
+    /** Returns a job by id, or {@code null}. */
     public Job getJobById(String id) throws IOException {
         return loadJobs().stream().filter(j -> j.getId().equals(id)).findFirst().orElse(null);
     }
 
+    /** Inserts or replaces a job by id. */
     public void saveJob(Job job) throws IOException {
         withWriteLock(() -> {
             List<Job> jobs = loadJobsUnlocked();
@@ -886,6 +922,7 @@ public class DataStorage {
         });
     }
 
+    /** Assigns a new id and appends an OPEN job. */
     public Job addJob(Job job) throws IOException {
         withWriteLock(() -> {
             List<Job> jobs = loadJobsUnlocked();
@@ -900,14 +937,18 @@ public class DataStorage {
     }
 
     // ---- Applications ----
+
+    /** Loads all applications from {@code applications.json}. */
     public List<Application> loadApplications() throws IOException {
         return withReadLock(this::loadApplicationsUnlocked);
     }
 
+    /** Returns applications for one job. */
     public List<Application> getApplicationsByJobId(String jobId) throws IOException {
         return loadApplications().stream().filter(a -> a.getJobId().equals(jobId)).collect(Collectors.toList());
     }
 
+    /** Returns applications submitted by one TA. */
     public List<Application> getApplicationsByApplicantId(String applicantId) throws IOException {
         return loadApplications().stream().filter(a -> a.getApplicantId().equals(applicantId)).collect(Collectors.toList());
     }
@@ -927,6 +968,7 @@ public class DataStorage {
         return "PENDING".equals(status) || "INTERVIEW".equals(status) || "SELECTED".equals(status);
     }
 
+    /** Inserts or replaces an application by id. */
     public void saveApplication(Application app) throws IOException {
         withWriteLock(() -> {
             List<Application> apps = loadApplicationsUnlocked();
@@ -936,6 +978,7 @@ public class DataStorage {
         });
     }
 
+    /** Assigns a new id and appends a PENDING application. */
     public Application addApplication(Application app) throws IOException {
         withWriteLock(() -> {
             List<Application> apps = loadApplicationsUnlocked();
@@ -950,10 +993,13 @@ public class DataStorage {
     }
 
     // ---- Application timeline events ----
+
+    /** Loads all application timeline events. */
     public List<ApplicationEvent> loadApplicationEvents() throws IOException {
         return withReadLock(this::loadApplicationEventsUnlocked);
     }
 
+    /** Returns timeline events for one application, oldest first. */
     public List<ApplicationEvent> getApplicationEventsByApplicationId(String applicationId) throws IOException {
         if (applicationId == null || applicationId.trim().isEmpty()) {
             return new ArrayList<>();
@@ -964,6 +1010,7 @@ public class DataStorage {
                 .collect(Collectors.toList());
     }
 
+    /** Returns timeline events grouped by application id (empty list when none). */
     public Map<String, List<ApplicationEvent>> getApplicationEventsByApplicationIds(Collection<String> applicationIds) throws IOException {
         if (applicationIds == null || applicationIds.isEmpty()) {
             return new LinkedHashMap<>();
@@ -983,6 +1030,7 @@ public class DataStorage {
         return grouped;
     }
 
+    /** Assigns an id and appends a timeline event. */
     public ApplicationEvent addApplicationEvent(ApplicationEvent event) throws IOException {
         if (event == null || event.getApplicationId() == null || event.getApplicationId().trim().isEmpty()) {
             return event;
@@ -1007,10 +1055,13 @@ public class DataStorage {
     }
 
     // ---- Interview evaluations ----
+
+    /** Loads all interview evaluations. */
     public List<InterviewEvaluation> loadInterviewEvaluations() throws IOException {
         return withReadLock(this::loadInterviewEvaluationsUnlocked);
     }
 
+    /** Returns the evaluation for an application, or {@code null}. */
     public InterviewEvaluation getInterviewEvaluationByApplicationId(String applicationId) throws IOException {
         if (applicationId == null || applicationId.trim().isEmpty()) {
             return null;
@@ -1021,6 +1072,7 @@ public class DataStorage {
                 .orElse(null);
     }
 
+    /** Returns evaluations for a job, highest score first. */
     public List<InterviewEvaluation> getInterviewEvaluationsByJobId(String jobId) throws IOException {
         if (jobId == null || jobId.trim().isEmpty()) {
             return new ArrayList<>();
@@ -1032,6 +1084,7 @@ public class DataStorage {
                 .collect(Collectors.toList());
     }
 
+    /** Inserts or updates an evaluation keyed by application id. */
     public InterviewEvaluation saveInterviewEvaluation(InterviewEvaluation evaluation) throws IOException {
         if (evaluation == null || evaluation.getApplicationId() == null || evaluation.getApplicationId().trim().isEmpty()) {
             return evaluation;
@@ -1070,10 +1123,13 @@ public class DataStorage {
     }
 
     // ---- Interview slots ----
+
+    /** Loads all interview slots. */
     public List<InterviewSlot> loadInterviewSlots() throws IOException {
         return withReadLock(this::loadInterviewSlotsUnlocked);
     }
 
+    /** Returns a slot by id, or {@code null}. */
     public InterviewSlot getInterviewSlotById(String slotId) throws IOException {
         return loadInterviewSlots().stream()
                 .filter(s -> Objects.equals(slotId, s.getId()))
@@ -1081,6 +1137,7 @@ public class DataStorage {
                 .orElse(null);
     }
 
+    /** Returns slots for a job, sorted by start time. */
     public List<InterviewSlot> getInterviewSlotsByJobId(String jobId) throws IOException {
         return loadInterviewSlots().stream()
                 .filter(s -> Objects.equals(jobId, s.getJobId()))
@@ -1088,6 +1145,7 @@ public class DataStorage {
                 .collect(Collectors.toList());
     }
 
+    /** Inserts or replaces a slot by id. */
     public void saveInterviewSlot(InterviewSlot slot) throws IOException {
         withWriteLock(() -> {
             List<InterviewSlot> slots = loadInterviewSlotsUnlocked();
@@ -1097,6 +1155,7 @@ public class DataStorage {
         });
     }
 
+    /** Assigns a new id and appends a slot. */
     public InterviewSlot addInterviewSlot(InterviewSlot slot) throws IOException {
         withWriteLock(() -> {
             List<InterviewSlot> slots = loadInterviewSlotsUnlocked();
@@ -1122,6 +1181,9 @@ public class DataStorage {
         return slot;
     }
 
+    /**
+     * @return {@code true} if a slot was removed
+     */
     public boolean deleteInterviewSlot(String slotId) throws IOException {
         final boolean[] changedRef = {false};
         withWriteLock(() -> {
@@ -1135,11 +1197,14 @@ public class DataStorage {
     }
 
     // ---- Admin settings ----
+
+    /** Loads platform admin settings, or defaults when missing. */
     public AdminSettings loadAdminSettings() throws IOException {
         AdminSettings settings = load(SETTINGS_FILE, AdminSettings.class);
         return settings != null ? settings : new AdminSettings();
     }
 
+    /** Persists platform admin settings. */
     public void saveAdminSettings(AdminSettings settings) throws IOException {
         save(SETTINGS_FILE, settings != null ? settings : new AdminSettings());
     }
@@ -1155,11 +1220,14 @@ public class DataStorage {
         return settings != null ? settings : new AiApiSettings();
     }
 
+    /** Persists admin-managed LLM API settings. */
     public void saveAiApiSettings(AiApiSettings settings) throws IOException {
         save(AI_API_SETTINGS_FILE, settings != null ? settings : new AiApiSettings());
     }
 
     // ---- MO module assignments ----
+
+    /** Returns modules assigned to an MO for job posting. */
     public List<AssignedModule> loadAssignedModulesForMo(String moUserId) throws IOException {
         if (moUserId == null || moUserId.trim().isEmpty()) {
             return new ArrayList<>();
@@ -1171,6 +1239,7 @@ public class DataStorage {
         });
     }
 
+    /** Replaces the module list assigned to an MO. */
     public void saveAssignedModulesForMo(String moUserId, List<AssignedModule> modules) throws IOException {
         if (moUserId == null || moUserId.trim().isEmpty()) {
             return;
@@ -1194,10 +1263,13 @@ public class DataStorage {
     }
 
     // ---- Site notifications ----
+
+    /** Loads all in-app site notifications. */
     public List<SiteNotification> loadSiteNotifications() throws IOException {
         return withReadLock(this::loadSiteNotificationsUnlocked);
     }
 
+    /** Assigns an id and appends an in-app notification. */
     public SiteNotification addSiteNotification(SiteNotification n) throws IOException {
         withWriteLock(() -> {
             List<SiteNotification> all = loadSiteNotificationsUnlocked();
@@ -1212,6 +1284,7 @@ public class DataStorage {
         return n;
     }
 
+    /** Returns notifications for a user, newest first. */
     public List<SiteNotification> getSiteNotificationsForUser(String userId) throws IOException {
         return loadSiteNotifications().stream()
                 .filter(n -> Objects.equals(userId, n.getRecipientUserId()))
@@ -1219,12 +1292,14 @@ public class DataStorage {
                 .collect(Collectors.toList());
     }
 
+    /** Counts unread notifications for a user. */
     public int countUnreadSiteNotificationsForUser(String userId) throws IOException {
         return (int) loadSiteNotifications().stream()
                 .filter(n -> Objects.equals(userId, n.getRecipientUserId()) && !n.isRead())
                 .count();
     }
 
+    /** Returns one notification if it belongs to the user, or {@code null}. */
     public SiteNotification getSiteNotificationByIdForUser(String notificationId, String userId) throws IOException {
         return loadSiteNotifications().stream()
                 .filter(n -> Objects.equals(notificationId, n.getId()) && Objects.equals(userId, n.getRecipientUserId()))
@@ -1232,6 +1307,9 @@ public class DataStorage {
                 .orElse(null);
     }
 
+    /**
+     * @return {@code true} if the notification was marked read
+     */
     public boolean markSiteNotificationRead(String notificationId, String userId) throws IOException {
         final boolean[] changedRef = {false};
         withWriteLock(() -> {
@@ -1249,6 +1327,7 @@ public class DataStorage {
         return changedRef[0];
     }
 
+    /** Marks every notification for the user as read; returns how many changed. */
     public int markAllSiteNotificationsReadForUser(String userId) throws IOException {
         final int[] changedRef = {0};
         withWriteLock(() -> {
@@ -1266,6 +1345,7 @@ public class DataStorage {
         return changedRef[0];
     }
 
+    /** Marks selected notifications as read; returns how many changed. */
     public int markSiteNotificationsReadForUser(String userId, Collection<String> notificationIds) throws IOException {
         if (notificationIds == null || notificationIds.isEmpty()) {
             return 0;
@@ -1287,6 +1367,9 @@ public class DataStorage {
         return changedRef[0];
     }
 
+    /**
+     * @return {@code true} if the notification was marked unread
+     */
     public boolean markSiteNotificationUnread(String notificationId, String userId) throws IOException {
         final boolean[] changedRef = {false};
         withWriteLock(() -> {
@@ -1305,10 +1388,13 @@ public class DataStorage {
     }
 
     // ---- Email OTP ----
+
+    /** Loads all email OTP records. */
     public List<EmailOtpRecord> loadEmailOtpRecords() throws IOException {
         return withReadLock(this::loadEmailOtpRecordsUnlocked);
     }
 
+    /** Inserts or replaces an OTP record by id. */
     public void saveEmailOtpRecord(EmailOtpRecord record) throws IOException {
         if (record == null || record.getId() == null) {
             return;
@@ -1321,6 +1407,7 @@ public class DataStorage {
         });
     }
 
+    /** Assigns a new id and appends an OTP record. */
     public EmailOtpRecord addEmailOtpRecord(EmailOtpRecord record) throws IOException {
         if (record == null) {
             return null;
@@ -1335,6 +1422,7 @@ public class DataStorage {
         return record;
     }
 
+    /** Returns the most recent OTP for an email and purpose, or {@code null}. */
     public EmailOtpRecord findLatestEmailOtp(String email, String purpose) throws IOException {
         if (email == null || email.trim().isEmpty()) {
             return null;
@@ -1349,6 +1437,7 @@ public class DataStorage {
                 .orElse(null);
     }
 
+    /** Marks selected notifications as unread; returns how many changed. */
     public int markSiteNotificationsUnreadForUser(String userId, Collection<String> notificationIds) throws IOException {
         if (notificationIds == null || notificationIds.isEmpty()) {
             return 0;
@@ -1370,7 +1459,10 @@ public class DataStorage {
         return changedRef[0];
     }
 
+    /** Root directory containing JSON data files. */
     public Path getBasePath() { return basePath; }
+
+    /** Directory for uploaded CV files. */
     public Path getUploadPath() { return basePath.resolve("uploads"); }
 
     private boolean equalsIgnoreCaseTrimmed(String left, String right) {

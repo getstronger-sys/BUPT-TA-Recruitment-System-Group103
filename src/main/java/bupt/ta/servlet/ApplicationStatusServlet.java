@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Lists the logged-in TA's applications with status summaries and timeline events.
+ */
 public class ApplicationStatusServlet extends HttpServlet {
 
     @Override

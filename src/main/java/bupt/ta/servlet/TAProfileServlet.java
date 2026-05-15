@@ -13,6 +13,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * TA profile view and update (skills, availability, contact details).
+ */
 public class TAProfileServlet extends HttpServlet {
 
     @Override

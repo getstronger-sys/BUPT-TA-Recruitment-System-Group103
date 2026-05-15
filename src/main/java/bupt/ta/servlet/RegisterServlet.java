@@ -13,6 +13,9 @@ import javax.servlet.http.*;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
+/**
+ * TA self-registration with email OTP verification when enabled in admin settings.
+ */
 public class RegisterServlet extends HttpServlet {
     private static final Pattern EMAIL_PATTERN =
             Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");

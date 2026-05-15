@@ -17,6 +17,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * MO dashboard listing jobs and applicants grouped by recruitment stage.
+ */
 public class MOJobsServlet extends HttpServlet {
 
     private static final Set<String> JOB_VIEWS = Collections.unmodifiableSet(

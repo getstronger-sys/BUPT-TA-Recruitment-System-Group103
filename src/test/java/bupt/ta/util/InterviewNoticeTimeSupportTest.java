@@ -5,6 +5,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+/** Unit tests for {@link InterviewNoticeTimeSupport}. */
 public class InterviewNoticeTimeSupportTest {
 
     @Test

@@ -22,6 +22,7 @@ public final class PasswordHasher {
     private PasswordHasher() {
     }
 
+    /** Returns a new PBKDF2 hash for storage. */
     public static String hash(String rawPassword) {
         if (rawPassword == null) {
             throw new IllegalArgumentException("Password must not be null");
@@ -34,6 +35,7 @@ public final class PasswordHasher {
                 + Base64.getEncoder().encodeToString(derived);
     }
 
+    /** Verifies a raw password against a stored hash or legacy plaintext value. */
     public static boolean matches(String rawPassword, String storedPassword) {
         if (rawPassword == null || storedPassword == null || storedPassword.trim().isEmpty()) {
             return false;
@@ -57,6 +59,7 @@ public final class PasswordHasher {
         }
     }
 
+    /** Returns whether the stored value uses the PBKDF2 format. */
     public static boolean isHashed(String storedPassword) {
         return storedPassword != null && storedPassword.startsWith(PREFIX + "$");
     }

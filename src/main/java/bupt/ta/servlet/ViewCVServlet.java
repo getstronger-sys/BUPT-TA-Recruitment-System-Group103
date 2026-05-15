@@ -11,6 +11,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * Streams an uploaded CV file for authorized TA, MO, or admin viewers.
+ */
 public class ViewCVServlet extends HttpServlet {
 
     @Override

@@ -16,6 +16,9 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Submits a TA job application and records the initial timeline event.
+ */
 public class ApplyJobServlet extends HttpServlet {
 
     private final AdminService adminService = new AdminService();

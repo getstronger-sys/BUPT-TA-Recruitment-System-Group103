@@ -15,6 +15,9 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * MO view of one applicant's profile, applications, and interview evaluations across jobs.
+ */
 public class ApplicantDetailServlet extends HttpServlet {
 
     @Override

@@ -18,6 +18,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Saves or updates an MO interview evaluation and recommendation for an applicant.
+ */
 public class MOInterviewEvaluationServlet extends HttpServlet {
     private static final Set<String> RECOMMENDATIONS = new HashSet<>(
             Arrays.asList("STRONG_HIRE", "HIRE", "WAITLIST", "REJECT"));

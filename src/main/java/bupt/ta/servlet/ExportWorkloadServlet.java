@@ -10,6 +10,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
+/**
+ * Admin CSV export of TA workload derived from selected applications.
+ */
 public class ExportWorkloadServlet extends HttpServlet {
 
     private final AdminService adminService = new AdminService();

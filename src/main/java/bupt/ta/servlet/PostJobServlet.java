@@ -18,7 +18,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/** MO job posting: extended form fields; work rows feed {@link WorkArrangementSupport} (quota via {@link bupt.ta.util.WorkQuotaPlanner} on read paths). */
+/**
+ * Creates or updates an MO job posting, including structured work arrangements.
+ */
 public class PostJobServlet extends HttpServlet {
 
     private static final int MIN_RESPONSIBILITIES_LEN = 20;

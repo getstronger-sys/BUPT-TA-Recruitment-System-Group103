@@ -18,6 +18,9 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Uploads a TA CV (PDF/DOCX), stores the file, and optionally pre-fills profile fields via LLM.
+ */
 @MultipartConfig(maxFileSize = 5242880, maxRequestSize = 5242880) // 5MB
 public class CVUploadServlet extends HttpServlet {
 

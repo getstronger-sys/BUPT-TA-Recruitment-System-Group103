@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Lets a TA withdraw an application; may promote waitlisted candidates when auto-fill is enabled.
+ */
 public class WithdrawApplicationServlet extends HttpServlet {
 
     private final AIMatchService aiService = new AIMatchService();

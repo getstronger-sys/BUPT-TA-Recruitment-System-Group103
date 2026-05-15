@@ -16,6 +16,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+/** Unit tests for {@link InterviewBookingService}. */
 public class InterviewBookingServiceTest {
 
     private final InterviewBookingService bookingService = new InterviewBookingService();

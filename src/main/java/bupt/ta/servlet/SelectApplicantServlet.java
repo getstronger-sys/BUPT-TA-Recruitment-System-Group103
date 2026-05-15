@@ -18,6 +18,9 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+/**
+ * MO action to select, reject, or waitlist an applicant and record the decision.
+ */
 public class SelectApplicantServlet extends HttpServlet {
 
     private final AdminService adminService = new AdminService();

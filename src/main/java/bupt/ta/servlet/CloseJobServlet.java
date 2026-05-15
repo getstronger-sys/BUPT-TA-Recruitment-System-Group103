@@ -10,6 +10,9 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Allows an MO to close or reopen one of their job postings.
+ */
 public class CloseJobServlet extends HttpServlet {
 
     @Override

@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
+/** Unit tests for {@link NotificationReminderService}. */
 public class NotificationReminderServiceTest {
 
     private final NotificationReminderService reminderService = new NotificationReminderService();

@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * TA job search with optional filters and rule-based skill match scores.
+ */
 public class JobSearchServlet extends HttpServlet {
 
     private final AIMatchService aiService = new AIMatchService();

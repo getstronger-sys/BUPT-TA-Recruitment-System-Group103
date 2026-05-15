@@ -26,6 +26,7 @@ public final class ResumeTextExtractor {
     private ResumeTextExtractor() {
     }
 
+    /** Returns whether the file extension can be parsed for text extraction. */
     public static boolean supportsExtension(String extension) {
         String normalized = normalizeExtension(extension);
         return TXT.equals(normalized) || PDF.equals(normalized) || DOCX.equals(normalized);
@@ -35,6 +36,9 @@ public final class ResumeTextExtractor {
         return "PDF, DOCX or TXT";
     }
 
+    /**
+     * Extracts plain text from a CV file, truncated to {@link #MAX_CHARS} characters.
+     */
     public static String extract(Path absoluteFile, String extensionLowercase) throws IOException {
         if (absoluteFile == null || !Files.isRegularFile(absoluteFile)) {
             return "";
