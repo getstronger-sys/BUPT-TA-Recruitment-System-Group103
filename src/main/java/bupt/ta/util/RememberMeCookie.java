@@ -15,6 +15,10 @@ public final class RememberMeCookie {
 
     private RememberMeCookie() {}
 
+    /**
+     * @param request incoming request
+     * @return raw remember-me token, or {@code null} when absent
+     */
     public static String readRawToken(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
@@ -28,6 +32,12 @@ public final class RememberMeCookie {
         return null;
     }
 
+    /**
+     * @param response    outgoing response
+     * @param contextPath servlet context path for cookie scope
+     * @param secure      whether to set the {@code Secure} flag
+     * @param rawToken    token value issued by {@link bupt.ta.storage.DataStorage}
+     */
     public static void setToken(HttpServletResponse response, String contextPath, boolean secure, String rawToken) {
         Cookie cookie = new Cookie(NAME, rawToken);
         cookie.setPath(cookiePath(contextPath));
@@ -37,6 +47,13 @@ public final class RememberMeCookie {
         response.addCookie(cookie);
     }
 
+    /**
+     * Clears the remember-me cookie on the client.
+     *
+     * @param response    outgoing response
+     * @param contextPath servlet context path for cookie scope
+     * @param secure      whether to set the {@code Secure} flag
+     */
     public static void clear(HttpServletResponse response, String contextPath, boolean secure) {
         Cookie cookie = new Cookie(NAME, "");
         cookie.setPath(cookiePath(contextPath));

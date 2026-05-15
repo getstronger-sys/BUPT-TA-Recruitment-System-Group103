@@ -15,6 +15,10 @@ public final class JobWorkloadEstimator {
      * Average hours per recruited TA for this posting, from {@link WorkQuotaPlanner}.
      * Returns 0 when there are no valid arrangement rows.
      */
+    /**
+     * @param job job posting with work arrangements
+     * @return average hours per recruited TA, or 0 when arrangements are empty
+     */
     public static double estimatedHoursPerSelectedTa(Job job) {
         if (job == null) {
             return 0.0;

@@ -28,6 +28,7 @@ public class EmailNotificationService {
 
     private static final Path LOCAL_MAIL_PROPERTIES = Paths.get("data", "mail.properties");
 
+    /** Resolved SMTP and portal settings used to send mail. */
     public static class EmailSettings {
         private final String host;
         private final int port;
@@ -65,11 +66,15 @@ public class EmailNotificationService {
         public boolean isSsl() { return ssl; }
         public String getAppBaseUrl() { return appBaseUrl; }
 
+        /**
+         * @return {@code true} when email is enabled and host/from are set
+         */
         public boolean isConfigured() {
             return enabled && !isBlank(host) && !isBlank(from);
         }
     }
 
+    /** Outcome of a single send attempt. */
     public static class SendResult {
         private final boolean success;
         private final String detail;
@@ -83,10 +88,19 @@ public class EmailNotificationService {
         public String getDetail() { return detail; }
     }
 
+    /**
+     * Loads SMTP settings from environment, local properties, and optional admin overrides.
+     *
+     * @return resolved settings (never {@code null})
+     */
     public EmailSettings loadSettings() {
         return loadSettings(null);
     }
 
+    /**
+     * @param adminSettings optional admin UI settings (may be {@code null})
+     * @return resolved settings (never {@code null})
+     */
     public EmailSettings loadSettings(AdminSettings adminSettings) {
         Properties localProperties = loadLocalProperties();
         String host = firstNonBlank(
@@ -143,18 +157,38 @@ public class EmailNotificationService {
         return new EmailSettings(host, port, username, password, from, enabled, auth, startTls, ssl, appBaseUrl);
     }
 
+    /**
+     * @return {@code true} when SMTP host and from-address are configured
+     */
     public boolean isConfigured() {
         return loadSettings().isConfigured();
     }
 
+    /**
+     * @param adminSettings optional admin UI settings
+     * @return {@code true} when SMTP host and from-address are configured
+     */
     public boolean isConfigured(AdminSettings adminSettings) {
         return loadSettings(adminSettings).isConfigured();
     }
 
+    /**
+     * @param to      recipient address
+     * @param subject message subject
+     * @param body    plain-text body
+     * @return send outcome
+     */
     public SendResult sendPlainText(String to, String subject, String body) {
         return sendPlainText(to, subject, body, null);
     }
 
+    /**
+     * @param to            recipient address
+     * @param subject       message subject
+     * @param body          plain-text body
+     * @param adminSettings optional admin SMTP overrides
+     * @return send outcome
+     */
     public SendResult sendPlainText(String to, String subject, String body, AdminSettings adminSettings) {
         if (isBlank(to)) {
             return new SendResult(false, "Missing recipient email.");
@@ -200,6 +234,16 @@ public class EmailNotificationService {
         }
     }
 
+    /**
+     * Sends a multipart alternative message (plain + HTML).
+     *
+     * @param to            recipient address
+     * @param subject       message subject
+     * @param plainBody     plain-text fallback
+     * @param htmlBody      HTML body
+     * @param adminSettings optional admin SMTP overrides
+     * @return send outcome
+     */
     public SendResult sendHtml(String to, String subject, String plainBody, String htmlBody, AdminSettings adminSettings) {
         if (isBlank(to)) {
             return new SendResult(false, "Missing recipient email.");
@@ -256,10 +300,21 @@ public class EmailNotificationService {
         }
     }
 
+    /**
+     * Appends a portal URL line when {@code ta.mail.appBaseUrl} is configured.
+     *
+     * @param body         existing message body
+     * @param relativePath path under the app base URL (e.g. {@code /ta/applications})
+     * @return body with link appended, or unchanged when not configured
+     */
     public String maybeAppendPortalLink(String body, String relativePath) {
         return maybeAppendPortalLink(body, relativePath, null);
     }
 
+    /**
+     * @param adminSettings optional admin SMTP overrides
+     * @return body with link appended, or unchanged when not configured
+     */
     public String maybeAppendPortalLink(String body, String relativePath, AdminSettings adminSettings) {
         EmailSettings settings = loadSettings(adminSettings);
         if (!settings.isConfigured() || isBlank(settings.getAppBaseUrl()) || isBlank(relativePath)) {
@@ -272,6 +327,13 @@ public class EmailNotificationService {
         return body + "\n\nPortal: " + base + path;
     }
 
+    /**
+     * Builds an absolute portal URL for a relative path.
+     *
+     * @param relativePath  path under the app base URL
+     * @param adminSettings optional admin SMTP overrides
+     * @return absolute URL, or {@code null} when base URL is not configured
+     */
     public String resolvePortalUrl(String relativePath, AdminSettings adminSettings) {
         EmailSettings settings = loadSettings(adminSettings);
         if (!settings.isConfigured() || isBlank(settings.getAppBaseUrl()) || isBlank(relativePath)) {
@@ -284,10 +346,21 @@ public class EmailNotificationService {
         return base + path;
     }
 
+    /**
+     * @return branded HTML email document
+     */
     public String renderHtmlTemplate(String title, String bodyText, String actionText, String actionUrl) {
         return renderHtmlTemplate(title, null, bodyText, actionText, actionUrl);
     }
 
+    /**
+     * @param title       email heading
+     * @param displayName optional recipient name shown in the body
+     * @param bodyText    plain message (newlines converted to HTML)
+     * @param actionText  optional button label
+     * @param actionUrl   optional button href
+     * @return branded HTML email document
+     */
     public String renderHtmlTemplate(String title, String displayName, String bodyText, String actionText, String actionUrl) {
         String safeTitle = escHtml(title != null ? title : "");
         String safeBody = formatBodyText(bodyText != null ? bodyText : "");

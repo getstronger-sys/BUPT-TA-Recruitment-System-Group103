@@ -39,6 +39,9 @@ public final class WorkArrangementSupport {
 
     /**
      * Parses work-arrangement rows from the MO posting / edit form (same field names as post-job.jsp).
+     *
+     * @param req servlet request with {@code wa*} parameters
+     * @return parsed rows (may be empty)
      */
     public static List<WorkArrangementItem> parseWorkRowsFromRequest(HttpServletRequest req) {
         String[] names = req.getParameterValues("waWorkName");
@@ -100,7 +103,8 @@ public final class WorkArrangementSupport {
     }
 
     /**
-     * @return null if valid, otherwise a short English message for the MO
+     * @param items rows to validate (mutates duration fields when normalising)
+     * @return {@code null} if valid, otherwise a short English message for the MO
      */
     public static String validateWorkRowsForPosting(List<WorkArrangementItem> items) {
         if (items.isEmpty()) {
@@ -140,6 +144,9 @@ public final class WorkArrangementSupport {
 
     /**
      * Sets {@link Job#setTaSlots}, {@link Job#setWorkArrangements}, workingHours, workload, taAllocationPlan from items.
+     *
+     * @param job   job to update in place
+     * @param items validated work arrangement rows
      */
     public static void applyDerivedFields(Job job, List<WorkArrangementItem> items) {
         int sum = items.stream().mapToInt(WorkArrangementItem::getTaCount).sum();

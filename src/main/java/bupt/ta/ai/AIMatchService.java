@@ -18,9 +18,13 @@ public class AIMatchService {
      * Result of skill matching between applicant and job.
      */
     public static class MatchResult {
-        public final double score;           // 0-100
-        public final List<String> matched;   // skills applicant has that job needs
-        public final List<String> missing;  // skills job needs but applicant lacks
+        /** Match score from 0 to 100. */
+        public final double score;
+        /** Required skills the applicant appears to have. */
+        public final List<String> matched;
+        /** Required skills not found on the applicant profile. */
+        public final List<String> missing;
+        /** Human-readable summary of the score. */
         public final String explanation;
 
         public MatchResult(double score, List<String> matched, List<String> missing) {
@@ -62,6 +66,11 @@ public class AIMatchService {
      * Uses Jaccard-like similarity: matched / required.
      * Returns 0-100. Explainable: matched skills and missing skills listed.
      */
+    /**
+     * @param profile applicant profile (may be null)
+     * @param job     job posting with required skills
+     * @return scored match with matched and missing skill lists
+     */
     public MatchResult matchSkills(TAProfile profile, Job job) {
         Set<String> jobSkills = normalizeSkills(job.getRequiredSkills());
         Set<String> applicantSkills = normalizeSkills(profile != null ? profile.getSkills() : null);
@@ -101,10 +110,14 @@ public class AIMatchService {
      * Workload info for a TA (number of selected jobs).
      */
     public static class WorkloadInfo {
+        /** TA user id. */
         public final String taId;
+        /** Display name. */
         public final String taName;
+        /** Number of SELECTED applications. */
         public final int selectedCount;
-        public final boolean isBalanced;  // below or at average
+        /** {@code true} when at or below the cohort average selected count. */
+        public final boolean isBalanced;
 
         public WorkloadInfo(String taId, String taName, int selectedCount, boolean isBalanced) {
             this.taId = taId;
@@ -117,6 +130,11 @@ public class AIMatchService {
     /**
      * Calculate workload for each TA and determine balance recommendation.
      * Recommends TAs with lower workload for fairness.
+     */
+    /**
+     * @param selectedApps applications to count (SELECTED status only)
+     * @param taIdToName   map of applicant id to display name
+     * @return workload rows sorted by ascending selected count
      */
     public List<WorkloadInfo> getWorkloadBalancedOrder(List<Application> selectedApps,
                                                        Map<String, String> taIdToName) {
@@ -142,11 +160,16 @@ public class AIMatchService {
      * For MO: enrich applicants with match score, missing skills, and workload recommendation.
      */
     public static class ApplicantRecommendation {
+        /** Application under review. */
         public final Application application;
+        /** Applicant profile (may be null). */
         public final TAProfile profile;
+        /** Rule-based skill match. */
         public final MatchResult matchResult;
+        /** Count of jobs the applicant is already selected for. */
         public final int currentWorkload;
-        public final boolean workloadBalanced;  // prefer this TA for balance
+        /** {@code true} when workload is at or below average (prefer for balance). */
+        public final boolean workloadBalanced;
 
         public ApplicantRecommendation(Application app, TAProfile profile, MatchResult match, int workload, boolean balanced) {
             this.application = app;

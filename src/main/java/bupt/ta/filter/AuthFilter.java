@@ -11,6 +11,10 @@ import java.io.IOException;
  */
 public class AuthFilter implements Filter {
 
+    /**
+     * {@inheritDoc}
+     * <p>Redirects unauthenticated users to login and enforces role-based path access.
+     */
     @Override
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
             throws IOException, ServletException {

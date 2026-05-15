@@ -17,17 +17,28 @@ public final class LlmApplicantSummaryService {
 
     private final DeepSeekClient client;
 
+    /** Uses environment-driven {@link DeepSeekClient} configuration. */
     public LlmApplicantSummaryService() {
         this(new DeepSeekClient());
     }
 
+    /**
+     * @param client LLM client (typically from admin settings in the web app)
+     */
     public LlmApplicantSummaryService(DeepSeekClient client) {
         this.client = client;
     }
 
     /**
-     * Returns 5-8 concise bullet lines for MO review cards.
-     * Falls back to deterministic rule-based lines if LLM is unavailable.
+     * Returns 5–8 concise bullet lines for MO review cards.
+     * Falls back to deterministic rule-based lines if the LLM is unavailable.
+     *
+     * @param profile           applicant profile (may be null)
+     * @param job               job posting
+     * @param match             rule-based match result
+     * @param currentWorkload   number of jobs the applicant is already selected for
+     * @param workloadBalanced  whether workload is at or below cohort average
+     * @return summary lines (empty when inputs are invalid)
      */
     public List<String> buildSummaryLines(TAProfile profile,
                                           Job job,
@@ -60,6 +71,15 @@ public final class LlmApplicantSummaryService {
      * into lines if needed). The deterministic fallback used in the non-streaming path is
      * skipped here because we have already started emitting an SSE response when the LLM
      * call fails; surface the error to the caller instead.
+     *
+     * @param profile           applicant profile (may be null)
+     * @param job               job posting (required)
+     * @param match             rule-based match result (required)
+     * @param currentWorkload   selected job count for workload context
+     * @param workloadBalanced  workload balance flag
+     * @param onChunk           receives each streamed token
+     * @return full raw LLM text (caller may normalise into lines)
+     * @throws IOException when job/match are missing or the stream fails
      */
     public String buildSummaryStream(TAProfile profile, Job job, AIMatchService.MatchResult match,
                                      int currentWorkload, boolean workloadBalanced,

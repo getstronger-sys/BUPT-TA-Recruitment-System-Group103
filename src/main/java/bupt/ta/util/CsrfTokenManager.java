@@ -18,6 +18,10 @@ public final class CsrfTokenManager {
     private CsrfTokenManager() {
     }
 
+    /**
+     * @param session HTTP session
+     * @return existing CSRF token or a newly generated one stored on the session
+     */
     public static String getOrCreateToken(HttpSession session) {
         Object existing = session.getAttribute(SESSION_ATTRIBUTE);
         if (existing instanceof String && !((String) existing).trim().isEmpty()) {
@@ -28,6 +32,11 @@ public final class CsrfTokenManager {
         return token;
     }
 
+    /**
+     * @param expectedToken token from the session
+     * @param providedToken token from the request
+     * @return {@code true} when both are non-null and equal (constant-time)
+     */
     public static boolean isValid(String expectedToken, String providedToken) {
         if (expectedToken == null || providedToken == null) {
             return false;

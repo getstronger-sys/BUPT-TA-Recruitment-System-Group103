@@ -14,16 +14,23 @@ public final class LlmMatchInsightService {
 
     private final DeepSeekClient client;
 
+    /** Uses environment-driven {@link DeepSeekClient} configuration. */
     public LlmMatchInsightService() {
         this(new DeepSeekClient());
     }
 
+    /**
+     * @param client LLM client (typically from admin settings in the web app)
+     */
     public LlmMatchInsightService(DeepSeekClient client) {
         this.client = client;
     }
 
     /**
-     * @return short paragraph (English), or null if API unavailable / error
+     * @param profile applicant profile (may be null)
+     * @param job     job posting
+     * @param match   rule-based match result (may be null)
+     * @return short English paragraph, or {@code null} if the API is unavailable or fails
      */
     public String buildInsight(TAProfile profile, Job job, AIMatchService.MatchResult match) {
         if (!client.isConfigured() || job == null) {
@@ -41,7 +48,12 @@ public final class LlmMatchInsightService {
      * Streaming counterpart of {@link #buildInsight}. Each token chunk is delivered to
      * {@code onChunk} as it arrives; the full text is returned once the stream finishes.
      *
-     * @throws IOException           on transport / API errors (caller decides how to surface)
+     * @param profile applicant profile (may be null)
+     * @param job     job posting (required)
+     * @param match   rule-based match result (may be null)
+     * @param onChunk receives each streamed token
+     * @return full generated text after the stream completes
+     * @throws IOException           on transport or API errors
      * @throws IllegalStateException if the client is not configured
      */
     public String buildInsightStream(TAProfile profile, Job job, AIMatchService.MatchResult match,

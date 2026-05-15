@@ -22,6 +22,15 @@ public final class PaymentSupport {
     private PaymentSupport() {
     }
 
+    /**
+     * Validates form fields and returns a canonical payment string (e.g. {@code 12 GBP/hour}).
+     *
+     * @param amountRaw   numeric amount from the form
+     * @param currencyRaw currency code
+     * @param rateTypeRaw rate type (hour, session, flat stipend)
+     * @return normalized payment text stored on {@link bupt.ta.model.Job}
+     * @throws IllegalArgumentException when validation fails
+     */
     public static String normalizeFromForm(String amountRaw, String currencyRaw, String rateTypeRaw) {
         String amount = trim(amountRaw);
         String currency = normalizeCurrency(currencyRaw);
@@ -49,25 +58,43 @@ public final class PaymentSupport {
         return formatAmount(parsed) + " " + currency + "/" + rateType;
     }
 
+    /**
+     * @param raw stored payment string
+     * @return amount for repopulating the MO form, or empty when unparseable
+     */
     public static String amountInputValue(String raw) {
         ParsedPayment parsed = parse(raw);
         return parsed != null ? parsed.amount : "";
     }
 
+    /**
+     * @param raw stored payment string
+     * @return currency code for the form (defaults to GBP)
+     */
     public static String currencyInputValue(String raw) {
         ParsedPayment parsed = parse(raw);
         return parsed != null ? parsed.currency : "GBP";
     }
 
+    /**
+     * @param raw stored payment string
+     * @return rate type for the form (defaults to hour)
+     */
     public static String rateTypeInputValue(String raw) {
         ParsedPayment parsed = parse(raw);
         return parsed != null ? parsed.rateType : "hour";
     }
 
+    /**
+     * @return supported currency codes for the MO posting form
+     */
     public static String[] currencies() {
         return CURRENCIES.clone();
     }
 
+    /**
+     * @return supported rate types for the MO posting form
+     */
     public static String[] rateTypes() {
         return RATE_TYPES.clone();
     }

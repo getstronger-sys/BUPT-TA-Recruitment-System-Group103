@@ -71,6 +71,7 @@ public class AdminService {
         public int getCount(String status) { return applicationCounts.getOrDefault(status, 0); }
     }
 
+    /** Filtered user list with per-role activity metrics. */
     public static class UserDirectoryReport {
         private final int totalUsers;
         private final int totalTas;
@@ -101,6 +102,7 @@ public class AdminService {
         public int getVisibleCount() { return rows.size(); }
     }
 
+    /** One row in the admin user directory. */
     public static class UserListRow {
         private final User user;
         private final TAProfile profile;
@@ -163,6 +165,7 @@ public class AdminService {
         }
     }
 
+    /** TA workload summary for the admin workload page. */
     public static class WorkloadRow {
         private final String applicantId;
         private final String applicantName;
@@ -200,6 +203,7 @@ public class AdminService {
         public List<String> getSelectedJobTitles() { return selectedJobTitles; }
     }
 
+    /** TA who is at or over the configured workload cap. */
     public static class LimitAlert {
         private final String applicantId;
         private final String applicantName;
@@ -223,6 +227,7 @@ public class AdminService {
         public String getLoadVsCap() { return loadVsCap; }
     }
 
+    /** Application in interview stage missing expected notice fields. */
     public static class InterviewNoticeAlert {
         private final String applicationId;
         private final String applicantId;
@@ -253,6 +258,7 @@ public class AdminService {
         public boolean isMissingLocation() { return missingLocation; }
     }
 
+    /** Application data anomaly flagged for admin review. */
     public static class ApplicationAlert {
         private final String applicationId;
         private final String applicantId;
@@ -282,6 +288,7 @@ public class AdminService {
         public String getIssue() { return issue; }
     }
 
+    /** Job posting that has reached its selection capacity. */
     public static class CapacityAlert {
         private final String jobId;
         private final String jobTitle;
@@ -304,6 +311,7 @@ public class AdminService {
         public int getMaxApplicants() { return maxApplicants; }
     }
 
+    /** Aggregated alerts for the admin monitoring dashboard. */
     public static class MonitoringReport {
         private final List<LimitAlert> limitAlerts;
         private final List<InterviewNoticeAlert> interviewNoticeAlerts;
@@ -334,6 +342,7 @@ public class AdminService {
         }
     }
 
+    /** Application row on an admin detail view. */
     public static class AdminApplicationRow {
         private final Application application;
         private final Job job;
@@ -347,6 +356,7 @@ public class AdminService {
         public Job getJob() { return job; }
     }
 
+    /** Full admin read-only report for one TA. */
     public static class TADetailReport {
         private final User user;
         private final TAProfile profile;
@@ -398,6 +408,7 @@ public class AdminService {
         public long getReadNotificationCount() { return notifications.stream().filter(SiteNotification::isRead).count(); }
     }
 
+    /** One job row on an MO admin detail view. */
     public static class MOJobDetailRow {
         private final Job job;
         private final int totalApplications;
@@ -443,6 +454,7 @@ public class AdminService {
         public boolean isInactiveWithActiveApplications() { return inactiveWithActiveApplications; }
     }
 
+    /** Full admin read-only report for one module organiser. */
     public static class MODetailReport {
         private final User user;
         private final List<MOJobDetailRow> jobRows;

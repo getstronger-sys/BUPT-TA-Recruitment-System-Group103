@@ -39,6 +39,14 @@ public class StudentNotificationService {
         return jobId != null ? jobId : "Unknown job";
     }
 
+    /**
+     * Notifies the applicant that an application was submitted.
+     *
+     * @param storage persistence
+     * @param app     application record
+     * @param job     job posting (may be null)
+     * @throws IOException if notification persistence fails
+     */
     public static void notifyApplicationSubmitted(DataStorage storage, Application app, Job job) throws IOException {
         if (app == null || app.getApplicantId() == null) {
             return;
@@ -60,6 +68,14 @@ public class StudentNotificationService {
                 adminSettings);
     }
 
+    /**
+     * Notifies the applicant that their application moved to the interview stage.
+     *
+     * @param storage persistence
+     * @param app     application record
+     * @param job     job posting (may be null)
+     * @throws IOException if notification persistence fails
+     */
     public static void notifyInterviewInvite(DataStorage storage, Application app, Job job) throws IOException {
         if (app == null || app.getApplicantId() == null) {
             return;
@@ -82,6 +98,14 @@ public class StudentNotificationService {
                 adminSettings);
     }
 
+    /**
+     * Notifies the applicant that they are on the waitlist.
+     *
+     * @param storage persistence
+     * @param app     application record
+     * @param job     job posting (may be null)
+     * @throws IOException if notification persistence fails
+     */
     public static void notifyWaitlist(DataStorage storage, Application app, Job job) throws IOException {
         if (app == null || app.getApplicantId() == null) {
             return;
@@ -103,6 +127,14 @@ public class StudentNotificationService {
                 adminSettings);
     }
 
+    /**
+     * Notifies the applicant that they were selected for the role.
+     *
+     * @param storage persistence
+     * @param app     application record
+     * @param job     job posting (may be null)
+     * @throws IOException if notification persistence fails
+     */
     public static void notifySelected(DataStorage storage, Application app, Job job) throws IOException {
         if (app == null || app.getApplicantId() == null) {
             return;
@@ -123,6 +155,15 @@ public class StudentNotificationService {
                 adminSettings);
     }
 
+    /**
+     * Notifies the applicant that they were not selected.
+     *
+     * @param storage persistence
+     * @param app     application record
+     * @param job     job posting (may be null)
+     * @param moNotes optional organiser message included in the body
+     * @throws IOException if notification persistence fails
+     */
     public static void notifyRejected(DataStorage storage, Application app, Job job, String moNotes) throws IOException {
         if (app == null || app.getApplicantId() == null) {
             return;
@@ -149,6 +190,14 @@ public class StudentNotificationService {
                 adminSettings);
     }
 
+    /**
+     * Notifies the applicant of interview time, location, and assessment notes.
+     *
+     * @param storage persistence
+     * @param app     application record (carries interview fields)
+     * @param job     job posting (may be null)
+     * @throws IOException if notification persistence fails
+     */
     public static void notifyInterviewDetails(DataStorage storage, Application app, Job job) throws IOException {
         if (app == null || app.getApplicantId() == null) {
             return;
@@ -182,6 +231,15 @@ public class StudentNotificationService {
                 adminSettings);
     }
 
+    /**
+     * Notifies the applicant that a pending application was auto-closed (workload cap).
+     *
+     * @param storage persistence
+     * @param app     application record
+     * @param job     job posting (may be null)
+     * @param note    optional system note appended to the body
+     * @throws IOException if notification persistence fails
+     */
     public static void notifyAutoClosed(DataStorage storage, Application app, Job job, String note) throws IOException {
         if (app == null || app.getApplicantId() == null) {
             return;
@@ -204,6 +262,14 @@ public class StudentNotificationService {
                 adminSettings);
     }
 
+    /**
+     * Notifies the applicant that they withdrew an application.
+     *
+     * @param storage persistence
+     * @param app     application record
+     * @param job     job posting (may be null)
+     * @throws IOException if notification persistence fails
+     */
     public static void notifyWithdrawn(DataStorage storage, Application app, Job job) throws IOException {
         if (app == null || app.getApplicantId() == null) {
             return;
@@ -224,6 +290,14 @@ public class StudentNotificationService {
                 adminSettings);
     }
 
+    /**
+     * Notifies the applicant that they were promoted from the waitlist to selected.
+     *
+     * @param storage persistence
+     * @param app     application record
+     * @param job     job posting (may be null)
+     * @throws IOException if notification persistence fails
+     */
     public static void notifyAutoPromotedFromWaitlist(DataStorage storage, Application app, Job job) throws IOException {
         if (app == null || app.getApplicantId() == null) {
             return;

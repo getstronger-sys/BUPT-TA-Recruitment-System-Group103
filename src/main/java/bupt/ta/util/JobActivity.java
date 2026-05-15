@@ -16,16 +16,28 @@ public final class JobActivity {
 
     private JobActivity() {}
 
+    /**
+     * @param job job posting
+     * @return {@code true} when closed or past the application deadline
+     */
     public static boolean isInactive(Job job) {
         if (job == null) return true;
         if ("CLOSED".equalsIgnoreCase(job.getStatus())) return true;
         return isApplicationDeadlinePast(job.getDeadline());
     }
 
+    /**
+     * @param job job posting
+     * @return {@code true} when the job is still open and before deadline
+     */
     public static boolean isActive(Job job) {
         return !isInactive(job);
     }
 
+    /**
+     * @param job job posting
+     * @return {@link #PATH_ACTIVE} or {@link #PATH_INACTIVE} for MO navigation
+     */
     public static String listPathFor(Job job) {
         return isInactive(job) ? PATH_INACTIVE : PATH_ACTIVE;
     }

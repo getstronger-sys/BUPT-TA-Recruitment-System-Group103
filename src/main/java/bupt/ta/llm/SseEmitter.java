@@ -21,6 +21,12 @@ public final class SseEmitter {
     private final HttpServletResponse response;
     private final PrintWriter writer;
 
+    /**
+     * Prepares the response for Server-Sent Events streaming.
+     *
+     * @param response servlet response to configure
+     * @throws IOException if the writer cannot be opened
+     */
     public SseEmitter(HttpServletResponse response) throws IOException {
         this.response = response;
         response.setStatus(HttpServletResponse.SC_OK);
@@ -31,6 +37,9 @@ public final class SseEmitter {
         this.writer = response.getWriter();
     }
 
+    /**
+     * @param text token delta to send as a {@code chunk} event (ignored when blank)
+     */
     public void sendChunk(String text) {
         if (text == null || text.isEmpty()) {
             return;
@@ -40,12 +49,16 @@ public final class SseEmitter {
         send("chunk", payload.toString());
     }
 
+    /** Emits a {@code done} event with {@code {"ok":true}}. */
     public void sendDone() {
         JsonObject payload = new JsonObject();
         payload.addProperty("ok", true);
         send("done", payload.toString());
     }
 
+    /**
+     * @param message error text for the {@code error} event payload
+     */
     public void sendError(String message) {
         JsonObject payload = new JsonObject();
         payload.addProperty("ok", false);

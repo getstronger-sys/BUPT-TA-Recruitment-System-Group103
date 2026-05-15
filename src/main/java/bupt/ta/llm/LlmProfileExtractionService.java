@@ -42,10 +42,14 @@ public final class LlmProfileExtractionService {
 
     private final DeepSeekClient client;
 
+    /** Uses environment-driven {@link DeepSeekClient} configuration. */
     public LlmProfileExtractionService() {
         this(new DeepSeekClient());
     }
 
+    /**
+     * @param client LLM client (typically from admin settings in the web app)
+     */
     public LlmProfileExtractionService(DeepSeekClient client) {
         this.client = client;
     }
@@ -53,7 +57,10 @@ public final class LlmProfileExtractionService {
     /**
      * Parses CV text and merges into profile. Non-empty values from the model overwrite existing fields.
      *
-     * @return true if API was called and JSON was merged (even partially)
+     * @param profile     profile to update in place
+     * @param cvPlainText extracted CV plain text
+     * @return {@code true} if the API was called and JSON was merged (even partially)
+     * @throws IOException if the API fails or returns invalid JSON
      */
     public boolean extractAndMergeProfile(TAProfile profile, String cvPlainText) throws IOException {
         if (!client.isConfigured() || cvPlainText == null || cvPlainText.trim().isEmpty()) {

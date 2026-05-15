@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
  */
 public class NotificationReminderService {
 
+    /** Counts for the admin unread-reminder preview panel. */
     public static class ReminderPreview {
         private final boolean emailConfigured;
         private final int usersWithUnread;
@@ -38,6 +39,7 @@ public class NotificationReminderService {
         public int getRemindableUsers() { return remindableUsers; }
     }
 
+    /** Outcome of a batch unread-reminder email run. */
     public static class ReminderResult {
         private final boolean emailConfigured;
         private final int attemptedUsers;
@@ -59,6 +61,13 @@ public class NotificationReminderService {
 
     private final EmailNotificationService emailNotificationService = new EmailNotificationService();
 
+    /**
+     * Summarises unread in-app notifications and email readiness.
+     *
+     * @param storage persistence
+     * @return preview counts
+     * @throws IOException if data cannot be read
+     */
     public ReminderPreview buildPreview(DataStorage storage) throws IOException {
         AdminSettings adminSettings = storage.loadAdminSettings();
         List<SiteNotification> unread = loadUnreadNotifications(storage);
@@ -77,6 +86,13 @@ public class NotificationReminderService {
         );
     }
 
+    /**
+     * Emails each user with unread site notifications a digest (when SMTP is configured).
+     *
+     * @param storage persistence
+     * @return counts of attempted, sent, and skipped users
+     * @throws IOException if data cannot be read
+     */
     public ReminderResult sendUnreadReminders(DataStorage storage) throws IOException {
         AdminSettings adminSettings = storage.loadAdminSettings();
         List<SiteNotification> unread = loadUnreadNotifications(storage);

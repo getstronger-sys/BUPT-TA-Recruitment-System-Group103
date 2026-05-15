@@ -32,6 +32,9 @@ public final class ResumeTextExtractor {
         return TXT.equals(normalized) || PDF.equals(normalized) || DOCX.equals(normalized);
     }
 
+    /**
+     * @return human-readable list of allowed CV extensions for upload UI
+     */
     public static String supportedExtensionsDisplay() {
         return "PDF, DOCX or TXT";
     }

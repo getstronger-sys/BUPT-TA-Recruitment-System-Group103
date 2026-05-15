@@ -115,11 +115,21 @@ public final class InterviewCalendarSupport {
         return null;
     }
 
+    /**
+     * @param raw interview time text from an application notice
+     * @return parsed start time, or {@code null} when unparseable
+     */
     public static LocalDateTime parseInterviewTime(String raw) {
         ParsedInterview p = parseInterview(raw);
         return p != null ? p.start : null;
     }
 
+    /**
+     * @param application application carrying {@link bupt.ta.model.Application#getInterviewTime()}
+     * @param job         related job (for summary text)
+     * @return ICS calendar document bytes as a UTF-8 string
+     * @throws IllegalArgumentException when interview time cannot be parsed
+     */
     public static String buildCalendarFile(Application application, Job job) {
         ParsedInterview window = parseInterview(application != null ? application.getInterviewTime() : null);
         if (application == null || window == null || window.start == null) {
