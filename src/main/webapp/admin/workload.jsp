@@ -1,3 +1,4 @@
+<%-- Legacy page: AdminWorkloadServlet forwards to admin/workload-v2.jsp. Kept for reference only. --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
 <% List<Object[]> workloadRows = (List<Object[]>) request.getAttribute("workloadRows"); if (workloadRows == null) workloadRows = java.util.Collections.emptyList();

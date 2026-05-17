@@ -928,6 +928,31 @@ public class AdminService {
         return sum;
     }
 
+    /**
+     * Returns true when selecting this applicant for {@code job} would meet or exceed the admin workload cap.
+     */
+    public boolean wouldExceedWorkloadLimitOnSelect(DataStorage storage, String applicantId, Job job,
+                                                    AdminSettings settings) throws IOException {
+        if (applicantId == null || applicantId.trim().isEmpty() || settings == null || !settings.hasWorkloadLimit()) {
+            return false;
+        }
+        if (settings.usesHourWorkloadLimit()) {
+            double cap = settings.getMaxWorkloadHoursPerTa();
+            double already = sumSelectedWorkloadHours(storage, applicantId);
+            double add = JobWorkloadEstimator.estimatedHoursPerSelectedTa(job);
+            return already + add > cap + 1e-9;
+        }
+        int cap = settings.getMaxSelectedJobsPerTa();
+        if (cap <= 0) {
+            return false;
+        }
+        long selectedCount = storage.loadApplications().stream()
+                .filter(a -> applicantId.equals(a.getApplicantId()))
+                .filter(a -> "SELECTED".equals(a.getStatus()))
+                .count();
+        return selectedCount >= cap;
+    }
+
     public int enforceWorkloadLimitForApplicant(DataStorage storage, String applicantId, String keepApplicationId,
                                                 AdminSettings settings) throws IOException {
         if (applicantId == null || applicantId.trim().isEmpty()) {
