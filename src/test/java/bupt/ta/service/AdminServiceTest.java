@@ -132,6 +132,32 @@ public class AdminServiceTest {
     }
 
     @Test
+    public void testWouldExceedWorkloadLimitOnSelectByJobCount() throws Exception {
+        Path tmp = Files.createTempDirectory("ta-admin-test");
+        try {
+            DataStorage storage = new DataStorage(tmp.toString());
+            User applicant = createUser(storage, "ta-cap", "Cap TA");
+            Job jobA = createJob(storage, "Job A", "EBU9001", 2);
+            Job jobB = createJob(storage, "Job B", "EBU9002", 2);
+            Job jobC = createJob(storage, "Job C", "EBU9003", 2);
+            createApplication(storage, jobA.getId(), applicant.getId(), applicant.getRealName(), "SELECTED");
+            createApplication(storage, jobB.getId(), applicant.getId(), applicant.getRealName(), "SELECTED");
+
+            AdminSettings settings = new AdminSettings();
+            settings.setMaxSelectedJobsPerTa(2);
+            settings.setMaxWorkloadHoursPerTa(0);
+
+            assertTrue(adminService.wouldExceedWorkloadLimitOnSelect(storage, applicant.getId(), jobC, settings));
+
+            User underCap = createUser(storage, "ta-under-cap", "Under Cap TA");
+            createApplication(storage, jobA.getId(), underCap.getId(), underCap.getRealName(), "SELECTED");
+            assertFalse(adminService.wouldExceedWorkloadLimitOnSelect(storage, underCap.getId(), jobB, settings));
+        } finally {
+            deleteRecursive(tmp);
+        }
+    }
+
+    @Test
     public void testMonitoringReportFindsExpectedIssues() throws Exception {
         Path tmp = Files.createTempDirectory("ta-admin-test");
         try {

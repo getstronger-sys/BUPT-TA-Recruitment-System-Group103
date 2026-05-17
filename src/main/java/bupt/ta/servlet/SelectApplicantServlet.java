@@ -109,6 +109,12 @@ public class SelectApplicantServlet extends HttpServlet {
                 redirectJobs(resp, req, listPath, fullView, jobId, "error=capacity_reached");
                 return;
             }
+            AdminSettings settings = storage.loadAdminSettings();
+            if (adminService.wouldExceedWorkloadLimitOnSelect(storage, target.getApplicantId(), job, settings)) {
+                String fullView = "WAITLIST".equals(target.getStatus()) ? "waitlist" : "interview";
+                redirectJobs(resp, req, listPath, fullView, jobId, "error=ta_workload_cap");
+                return;
+            }
             target.setStatus("SELECTED");
         } else if ("reject".equalsIgnoreCase(action)) {
             if (!"PENDING".equals(target.getStatus()) && !"INTERVIEW".equals(target.getStatus())

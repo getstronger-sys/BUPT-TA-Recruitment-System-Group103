@@ -122,6 +122,8 @@ public class DataStorage {
                     createUser("U002", "ta2", "ta123", "TA", "ta2@bupt.edu.cn", "Li Si"),
                     createUser("U005", "ta3", "ta123", "TA", "ta3@bupt.edu.cn", "Wang Wu"),
                     createUser("U006", "ta4", "ta123", "TA", "ta4@bupt.edu.cn", "Zhao Liu"),
+                    createUser("U007", "ta5", "ta123", "TA", "ta5@bupt.edu.cn", "Wu Qian"),
+                    createUser("U008", "ta6", "ta123", "TA", "ta6@bupt.edu.cn", "Chen Chao"),
                     createUser("U003", "mo1", "mo123", "MO", "mo1@bupt.edu.cn", "Wang MO"),
                     createUser("U004", "admin", "admin123", "ADMIN", "admin@bupt.edu.cn", "System Admin")
             );
@@ -269,6 +271,7 @@ public class DataStorage {
             save(APPLICATIONS_FILE, demoApps);
         }
         ensureDemoJobsAndApplicationsExist();
+        ensureWorkloadConflictDemoData();
     }
 
     private void ensureDemoUsersExist() throws IOException {
@@ -276,9 +279,58 @@ public class DataStorage {
         boolean changed = false;
         changed |= addUserIfMissing(users, createUser("U005", "ta3", "ta123", "TA", "ta3@bupt.edu.cn", "Wang Wu"));
         changed |= addUserIfMissing(users, createUser("U006", "ta4", "ta123", "TA", "ta4@bupt.edu.cn", "Zhao Liu"));
+        changed |= addUserIfMissing(users, createUser("U007", "ta5", "ta123", "TA", "ta5@bupt.edu.cn", "Wu Qian"));
+        changed |= addUserIfMissing(users, createUser("U008", "ta6", "ta123", "TA", "ta6@bupt.edu.cn", "Chen Chao"));
         if (changed) {
             save(USERS_FILE, users);
         }
+    }
+
+    /**
+     * Seeds README workload-conflict demo accounts (ta5 at cap + pending, ta6 over cap).
+     */
+    private void ensureWorkloadConflictDemoData() throws IOException {
+        if (!seedDemoData) {
+            return;
+        }
+        List<Application> apps = loadApplications();
+        boolean changed = false;
+        changed |= addWorkloadDemoApplicationIfMissing(apps, "A00005", "J0001", "U007", "Wu Qian", "SELECTED",
+                "Demo: at workload cap (selected).");
+        changed |= addWorkloadDemoApplicationIfMissing(apps, "A00006", "J0002", "U007", "Wu Qian", "SELECTED",
+                "Demo: second selected post for cap scenario.");
+        changed |= addWorkloadDemoApplicationIfMissing(apps, "A00007", "J0003", "U007", "Wu Qian", "PENDING",
+                "Demo: pending while already at selected-job cap.");
+        changed |= addWorkloadDemoApplicationIfMissing(apps, "A00008", "J0001", "U008", "Chen Chao", "SELECTED",
+                "Demo: over workload cap (1/3).");
+        changed |= addWorkloadDemoApplicationIfMissing(apps, "A00009", "J0002", "U008", "Chen Chao", "SELECTED",
+                "Demo: over workload cap (2/3).");
+        changed |= addWorkloadDemoApplicationIfMissing(apps, "A00010", "J0003", "U008", "Chen Chao", "SELECTED",
+                "Demo: over workload cap (3/3).");
+        if (changed) {
+            save(APPLICATIONS_FILE, apps);
+        }
+    }
+
+    private boolean addWorkloadDemoApplicationIfMissing(List<Application> apps, String id, String jobId,
+                                                        String applicantId, String applicantName, String status,
+                                                        String notes) {
+        if (apps.stream().anyMatch(a -> id.equals(a.getId()))) {
+            return false;
+        }
+        Application app = new Application();
+        app.setId(id);
+        app.setJobId(jobId);
+        app.setApplicantId(applicantId);
+        app.setApplicantName(applicantName);
+        app.setStatus(status);
+        app.setAppliedAt(java.time.LocalDateTime.now().minusDays(2).toString());
+        app.setPreferredRole("TA-1");
+        if (notes != null && !notes.trim().isEmpty()) {
+            app.setNotes(notes);
+        }
+        apps.add(app);
+        return true;
     }
 
     private boolean addUserIfMissing(List<User> users, User candidate) {

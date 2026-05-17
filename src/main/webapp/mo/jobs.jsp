@@ -74,6 +74,7 @@
                    if ("not_pending".equals(err)) errMsg = "Only pending applications can be moved to interview.";
                    else if ("not_interview".equals(err)) errMsg = "Only interview-stage applications can be selected.";
                    else if ("capacity_reached".equals(err)) errMsg = "Planned recruit slots are already full for this posting.";
+                   else if ("ta_workload_cap".equals(err)) errMsg = "This applicant has reached the admin workload cap and cannot be selected for another post.";
                    else if ("evaluation_required".equals(err)) errMsg = "Save an interview evaluation before selecting this applicant.";
                    else if ("decision_reason_required".equals(err)) errMsg = "Selection requires a decision reason.";
                    else if ("not_applicant".equals(err)) errMsg = "This action is not allowed for the current status.";
