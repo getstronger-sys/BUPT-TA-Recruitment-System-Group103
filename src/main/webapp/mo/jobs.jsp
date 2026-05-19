@@ -248,25 +248,9 @@
                 </table>
                 <p class="muted-inline job-wa-edit-hint">
                     Balanced by planned recruits: total estimated workload <strong><%= String.format(Locale.US, "%.2f", quotaRec.getTotalHours()) %> h</strong>,
-                    average per TA <strong><%= String.format(Locale.US, "%.2f", quotaRec.getAverageHours()) %> h</strong>,
-                    imbalance (max-min) <strong><%= String.format(Locale.US, "%.2f", quotaRec.getImbalanceHours()) %> h</strong>.
+                    average per selected TA <strong><%= String.format(Locale.US, "%.2f", quotaRec.getAverageHours()) %> h</strong>.
+                    Selected TAs share one common role for this posting.
                 </p>
-                <div class="ta-duty-board">
-                    <% for (WorkQuotaPlanner.TAQuota q : quotaRec.getQuotas()) {
-                           StringBuilder duty = new StringBuilder();
-                           for (Map.Entry<String, Integer> e : q.getWorkCounts().entrySet()) {
-                               if (duty.length() > 0) duty.append("; ");
-                               duty.append(escHtml(e.getKey())).append(" x ").append(e.getValue());
-                           }
-                           if (duty.length() == 0) duty.append("No assigned work units.");
-                    %>
-                    <article class="ta-duty-card">
-                        <div class="ta-duty-head"><span class="arr-icon arr-icon-slots" aria-hidden="true">TA</span><%= escHtml(q.getName()) %></div>
-                        <p><strong>Estimated load:</strong> <%= String.format(Locale.US, "%.2f", q.getTotalHours()) %> h</p>
-                        <p class="pre-wrap"><%= duty.toString() %></p>
-                    </article>
-                    <% } %>
-                </div>
             </div>
             <% } %>
             <div class="context-card">
@@ -442,7 +426,6 @@
                             <section class="applicant-section">
                                 <div class="section-label">Application</div>
                                 <p class="section-copy"><strong>Applied:</strong> <%= appliedText %></p>
-                                <p class="section-copy"><strong>Preferred role:</strong> <%= escHtml(a.getPreferredRole() != null && !a.getPreferredRole().isEmpty() ? a.getPreferredRole() : "Not selected") %></p>
                             </section>
                         </div>
                         <div class="applicant-actions">
@@ -586,7 +569,6 @@
                             <section class="applicant-section">
                                 <div class="section-label">Application</div>
                                 <p class="section-copy"><strong>Applied:</strong> <%= appliedText %></p>
-                                <p class="section-copy"><strong>Preferred role:</strong> <%= escHtml(a.getPreferredRole() != null && !a.getPreferredRole().isEmpty() ? a.getPreferredRole() : "Not selected") %></p>
                             </section>
                         </div>
                         <div class="applicant-actions">
@@ -668,7 +650,6 @@
                             <section class="applicant-section">
                                 <div class="section-label">Application</div>
                                 <p class="section-copy"><strong>Applied:</strong> <%= appliedText %></p>
-                                <p class="section-copy"><strong>Preferred role:</strong> <%= escHtml(a.getPreferredRole() != null && !a.getPreferredRole().isEmpty() ? a.getPreferredRole() : "Not selected") %></p>
                             </section>
                         </div>
                         <div class="applicant-actions">
@@ -707,7 +688,6 @@
                             <span class="status-pill status-pill-rejected">WITHDRAWN</span>
                         </div>
                         <p class="section-copy"><strong>Applied:</strong> <%= appliedText %></p>
-                        <p class="section-copy"><strong>Preferred role:</strong> <%= escHtml(a.getPreferredRole() != null && !a.getPreferredRole().isEmpty() ? a.getPreferredRole() : "Not selected") %></p>
                     </article>
                     <% } %>
                     <% if (withdrawnRecs.isEmpty()) { %><p class="muted-inline section-empty">No withdrawn applications for this posting.</p><% } %>
@@ -778,7 +758,6 @@
                             <section class="applicant-section">
                                 <div class="section-label">Application</div>
                                 <p class="section-copy"><strong>Applied:</strong> <%= appliedText %></p>
-                                <p class="section-copy"><strong>Preferred role:</strong> <%= escHtml(a.getPreferredRole() != null && !a.getPreferredRole().isEmpty() ? a.getPreferredRole() : "Not selected") %></p>
                             </section>
                         </div>
                         <div class="applicant-actions">

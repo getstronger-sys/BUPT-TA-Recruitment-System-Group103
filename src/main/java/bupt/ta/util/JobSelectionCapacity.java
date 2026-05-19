@@ -16,7 +16,7 @@ public final class JobSelectionCapacity {
 
     /**
      * @param job job posting (may be null)
-     * @return planned TA slots, at least 1
+     * @return planned recruit count, at least 1
      */
     public static int selectionSlots(Job job) {
         if (job == null) {

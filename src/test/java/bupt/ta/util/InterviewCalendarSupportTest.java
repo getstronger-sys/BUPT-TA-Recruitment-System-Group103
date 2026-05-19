@@ -62,7 +62,6 @@ public class InterviewCalendarSupportTest {
         app.setInterviewTime("2026-04-18 14:30");
         app.setInterviewLocation("EECS Building Room 402");
         app.setInterviewAssessment("Teaching demo");
-        app.setPreferredRole("TA-2");
 
         Job job = new Job();
         job.setTitle("TA for Software Engineering");

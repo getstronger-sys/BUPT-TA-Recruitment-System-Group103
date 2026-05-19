@@ -12,7 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Builds a balanced per-TA quota recommendation from work-arrangement rows.
+ * Builds a balanced workload recommendation from work-arrangement rows.
  */
 public final class WorkQuotaPlanner {
 
@@ -27,10 +27,10 @@ public final class WorkQuotaPlanner {
      *
      * @param rows            structured work arrangement rows
      * @param plannedRecruits number of TAs to recruit (at least 1 used internally)
-     * @return per-TA hour quotas and summary statistics
+     * @return workload share estimates and summary statistics
      */
     public static Recommendation recommend(List<WorkArrangementItem> rows, int plannedRecruits) {
-        // at least one slot to avoid divide-by-zero
+        // at least one recruit to avoid divide-by-zero
         int headcount = Math.max(1, plannedRecruits);
         // atomic work chunks to assign one-by-one
         List<WorkUnit> units = new ArrayList<>();
@@ -60,7 +60,7 @@ public final class WorkQuotaPlanner {
 
         List<TAQuota> quotas = new ArrayList<>();
         for (int i = 0; i < headcount; i++) {
-            quotas.add(new TAQuota("TA " + (i + 1)));
+            quotas.add(new TAQuota("Share " + (i + 1)));
         }
         units.sort(Comparator.comparingDouble((WorkUnit u) -> u.hours).reversed());
         for (WorkUnit unit : units) {
@@ -69,7 +69,7 @@ public final class WorkQuotaPlanner {
             picked.totalHours += unit.hours;
             picked.workCounts.put(unit.workName, picked.workCounts.getOrDefault(unit.workName, 0) + 1);
         }
-        // string order: TA 1, TA 10, TA 2 — lexicographic by label
+        // Keep a stable label order after repeatedly sorting by current load.
         quotas.sort(Comparator.comparing(TAQuota::getName));
 
         double totalHours = units.stream().mapToDouble(u -> u.hours).sum();
@@ -144,7 +144,7 @@ public final class WorkQuotaPlanner {
         }
     }
 
-    /** One virtual TA slot: running total hours and per-work-name counts. */
+    /** One virtual workload share: running total hours and per-work-name counts. */
     public static final class TAQuota {
         private final String name;
         private double totalHours;

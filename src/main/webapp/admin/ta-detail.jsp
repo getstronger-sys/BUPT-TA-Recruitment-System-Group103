@@ -205,7 +205,6 @@
                             <th>Application</th>
                             <th>Job</th>
                             <th>Applied</th>
-                            <th>Preferred role</th>
                             <th>Status</th>
                             <th>Interview record</th>
                             <th>Notes</th>
@@ -231,7 +230,6 @@
                                 <div class="admin-row-subtext"><%= escHtml(job != null && job.getModuleCode() != null ? job.getModuleCode() : "-") %></div>
                             </td>
                             <td><%= escHtml(app.getAppliedAt() != null && !app.getAppliedAt().isEmpty() ? app.getAppliedAt() : "-") %></td>
-                            <td><%= escHtml(app.getPreferredRole() != null && !app.getPreferredRole().isEmpty() ? app.getPreferredRole() : "-") %></td>
                             <td><span class="status-pill <%= statusClass %>"><%= escHtml(status) %></span></td>
                             <td>
                                 <div class="admin-summary-stack">

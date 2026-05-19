@@ -27,7 +27,6 @@ public class ApplyJobServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String jobId = req.getParameter("jobId");
-        String preferredRole = req.getParameter("preferredRole");
         String applicantId = (String) req.getSession().getAttribute("userId");
         String applicantName = (String) req.getSession().getAttribute("realName");
         if (applicantName == null) {
@@ -51,22 +50,6 @@ public class ApplyJobServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/ta/jobs?error=job_closed");
             return;
         }
-        int taSlots = job.getTaSlots() > 0 ? job.getTaSlots() : 1;
-        if (preferredRole == null || !preferredRole.matches("^TA-[1-9]\\d*$")) {
-            resp.sendRedirect(req.getContextPath() + "/ta/apply-confirm?jobId=" + jobId + "&error=invalid_role");
-            return;
-        }
-        int roleNo;
-        try {
-            roleNo = Integer.parseInt(preferredRole.substring(3));
-        } catch (NumberFormatException ex) {
-            resp.sendRedirect(req.getContextPath() + "/ta/apply-confirm?jobId=" + jobId + "&error=invalid_role");
-            return;
-        }
-        if (roleNo <= 0 || roleNo > taSlots) {
-            resp.sendRedirect(req.getContextPath() + "/ta/apply-confirm?jobId=" + jobId + "&error=invalid_role");
-            return;
-        }
         if (storage.hasApplied(jobId, applicantId)) {
             resp.sendRedirect(req.getContextPath() + "/ta/jobs?error=already_applied");
             return;
@@ -88,12 +71,11 @@ public class ApplyJobServlet extends HttpServlet {
         app.setJobId(jobId);
         app.setApplicantId(applicantId);
         app.setApplicantName(applicantName);
-        app.setPreferredRole(preferredRole);
         storage.addApplication(app);
         timelineService.record(storage, app, job, applicantId, applicantName, "TA",
                 ApplicationTimelineService.TYPE_SUBMITTED,
                 "Application submitted",
-                "Preferred role: " + preferredRole,
+                "Application submitted for this posting.",
                 "", app.getStatus());
         StudentNotificationService.notifyApplicationSubmitted(storage, app, job);
 

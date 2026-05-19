@@ -55,7 +55,7 @@
 
 - **Screenshot**: [Job search - ta/jobs.jsp]
 - Search by keyword, module code, or skill.
-- Apply with a **preferred TA role** (TA-1, TA-2, …) within the job’s planned slots.
+- Apply to a posting directly; all planned TA recruits share the same role.
 - **Apply confirm** page shows match score and optional streaming match insight.
 
 ## TA - My Applications
@@ -68,7 +68,7 @@
 
 - **Screenshot**: [Post job form - mo/post-job.jsp]
 - Choose module from **Admin-assigned** list only.
-- Structured fields: responsibilities, work arrangements, exam timeline, interview schedule, payment, skills, TA slots.
+- Structured fields: responsibilities, work arrangements, exam timeline, interview schedule, payment, skills, planned recruits.
 
 ## MO - My Jobs (applicant pipeline)
 

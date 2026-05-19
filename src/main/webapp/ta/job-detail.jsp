@@ -48,15 +48,10 @@
         }
     }
 %>
-<%@ include file="/WEB-INF/jspf/job-ta-plan-chunks.jspf" %>
 <%
     String respText = job.getResponsibilities() != null && !job.getResponsibilities().isEmpty() ? escHtml(job.getResponsibilities()) : "—";
     String desc = job.getDescription() != null && !job.getDescription().isEmpty() ? escHtml(job.getDescription()) : "—";
     String safeTitle = escHtml(job.getTitle() != null ? job.getTitle() : "");
-    boolean taPlanSingleUnstructured = !taPlanChunks.isEmpty()
-            && taPlanChunks.size() == 1
-            && taPlanChunks.get(0)[0] == null;
-    boolean hideTaPlanDuplicateOfTable = hasWorkArrangementsTable && taPlanSingleUnstructured;
     int timelineMaxWeek = 14;
     for (String[] item : weekMilestones) {
         try {
@@ -257,25 +252,6 @@
                     </div>
                     <% } %>
                 </div>
-                <% if (!hideTaPlanDuplicateOfTable) { %>
-                <div class="ta-job-panel__chunk ta-job-panel__chunk--sep">
-                    <h3 class="ta-job-panel__title">Multi-TA allocation plan</h3>
-                    <% if (taPlanChunks.isEmpty()) { %>
-                    <p class="job-detail-empty">—</p>
-                    <% } else if (taPlanChunks.size() == 1 && taPlanChunks.get(0)[0] == null) { %>
-                    <div class="job-rich-text pre-wrap ta-job-panel__body"><%= taPlanChunks.get(0)[1] %></div>
-                    <% } else { %>
-                    <div class="ta-plan-grid">
-                        <% for (String[] row : taPlanChunks) { %>
-                        <article class="ta-plan-card">
-                            <% if (row[0] != null) { %><span class="ta-plan-badge"><%= row[0] %></span><% } %>
-                            <p class="ta-plan-text"><%= row[1] %></p>
-                        </article>
-                        <% } %>
-                    </div>
-                    <% } %>
-                </div>
-                <% } %>
                 <div class="ta-job-panel__chunk ta-job-panel__chunk--sep ta-job-panel__chunk--interview">
                     <h3 class="ta-job-panel__title">Interview <span class="ta-job-panel__title-tag">preview</span></h3>
                     <div class="job-interview-inline job-interview-inline--panel" role="group" aria-label="Estimated interview time and location">
@@ -297,29 +273,13 @@
             </section>
 
             <section class="ta-job-detail__section" aria-labelledby="ta-job-workload-title">
-            <h2 id="ta-job-workload-title" class="ta-job-detail__heading">Workload per TA <span class="ta-job-detail__heading-note">(estimate)</span></h2>
+            <h2 id="ta-job-workload-title" class="ta-job-detail__heading">Workload estimate</h2>
             <p class="muted-inline job-wa-edit-hint">
-                If every planned TA slot is filled, the same duties split about like this (modelled on <strong><%= plannedRecruits %></strong> recruit(s)):
+                If this posting is fully staffed with <strong><%= plannedRecruits %></strong> recruit(s),
                 total <strong><%= String.format(Locale.US, "%.2f", quotaRec.getTotalHours()) %> h</strong>,
-                average <strong><%= String.format(Locale.US, "%.2f", quotaRec.getAverageHours()) %> h</strong> per TA,
-                imbalance (max &minus; min) <strong><%= String.format(Locale.US, "%.2f", quotaRec.getImbalanceHours()) %> h</strong>.
+                average <strong><%= String.format(Locale.US, "%.2f", quotaRec.getAverageHours()) %> h</strong> per selected TA.
+                Specific work is shared by the selected TA group rather than tied to numbered TA roles.
             </p>
-            <div class="ta-duty-board">
-                <% for (WorkQuotaPlanner.TAQuota q : quotaRec.getQuotas()) {
-                       StringBuilder duty = new StringBuilder();
-                       for (Map.Entry<String, Integer> e : q.getWorkCounts().entrySet()) {
-                           if (duty.length() > 0) duty.append("; ");
-                           duty.append(escHtml(e.getKey())).append(" x ").append(e.getValue());
-                       }
-                       if (duty.length() == 0) duty.append("No assigned work units.");
-                %>
-                <article class="ta-duty-card">
-                    <div class="ta-duty-head"><span class="arr-icon arr-icon-slots" aria-hidden="true">TA</span><%= escHtml(q.getName()) %></div>
-                    <p><strong>Estimated load:</strong> <%= String.format(Locale.US, "%.2f", q.getTotalHours()) %> h</p>
-                    <p class="pre-wrap"><%= duty.toString() %></p>
-                </article>
-                <% } %>
-            </div>
             </section>
 
             <p class="ta-job-detail__posted"><em>Posted by <%= escHtml(job.getPostedByName() != null ? job.getPostedByName() : "MO") %></em></p>
