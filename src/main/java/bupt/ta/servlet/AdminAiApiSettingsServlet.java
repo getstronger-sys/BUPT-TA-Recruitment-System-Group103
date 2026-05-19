@@ -44,9 +44,11 @@ public class AdminAiApiSettingsServlet extends HttpServlet {
     private void renderForm(HttpServletRequest req, HttpServletResponse resp,
                             AiApiSettings settings, String error)
             throws ServletException, IOException {
-        DeepSeekClient probe = DeepSeekClient.fromAdminSettings(settings);
+        DeepSeekClient probe = DeepSeekClient.fromRuntimeSettings(settings);
         req.setAttribute("aiApiSettings", settings);
         req.setAttribute("deepSeekEffectiveConfigured", probe.isConfigured());
+        req.setAttribute("deepSeekEnvFallbackActive",
+                probe.isConfigured() && !settings.isEffectivelyConfigured());
         if (error != null) {
             req.setAttribute("error", error);
         }

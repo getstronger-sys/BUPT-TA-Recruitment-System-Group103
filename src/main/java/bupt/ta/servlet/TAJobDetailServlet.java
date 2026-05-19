@@ -1,6 +1,7 @@
 package bupt.ta.servlet;
 
 import bupt.ta.ai.AIMatchService;
+import bupt.ta.llm.DeepSeekClient;
 import bupt.ta.model.Job;
 import bupt.ta.model.TAProfile;
 import bupt.ta.storage.DataStorage;
@@ -42,7 +43,7 @@ public class TAJobDetailServlet extends HttpServlet {
         req.setAttribute("job", job);
         req.setAttribute("match", match);
         req.setAttribute("saved", saved);
-        req.setAttribute("llmEnabled", storage.loadAiApiSettings().isEffectivelyConfigured());
+        req.setAttribute("llmEnabled", DeepSeekClient.isRuntimeConfigured(storage.loadAiApiSettings()));
         req.getRequestDispatcher("/ta/job-detail.jsp").forward(req, resp);
     }
 }

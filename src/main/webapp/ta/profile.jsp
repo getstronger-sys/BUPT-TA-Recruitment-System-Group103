@@ -68,7 +68,7 @@
             <% } else if ("no_text".equals(aiStatus)) { %>
              AI prefill was skipped because we could not extract readable text from the file.
             <% } else if ("disabled".equals(aiStatus)) { %>
-             AI prefill is currently unavailable because the AI service is not configured.
+             AI prefill is currently unavailable. Configure Admin &rarr; AI API or set <code>TA_AI_API_KEY</code> in <code>ai.env</code> and restart with <code>run-with-ai.ps1</code>.
             <% } else if ("failed".equals(aiStatus)) { %>
              AI prefill was skipped because the file could not be processed automatically.
             <% } %>

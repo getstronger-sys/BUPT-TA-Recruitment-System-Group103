@@ -63,7 +63,7 @@ public class MOMatchInsightServlet extends HttpServlet {
 
         AIMatchService.MatchResult match = aiService.matchSkills(profile, job);
         AiApiSettings settings = storage.loadAiApiSettings();
-        DeepSeekClient client = DeepSeekClient.fromAdminSettings(settings);
+        DeepSeekClient client = DeepSeekClient.fromRuntimeSettings(settings);
         if (!client.isConfigured()) {
             writeJsonError(resp, HttpServletResponse.SC_SERVICE_UNAVAILABLE,
                     "AI API is not configured. Ask an admin to enable it.");

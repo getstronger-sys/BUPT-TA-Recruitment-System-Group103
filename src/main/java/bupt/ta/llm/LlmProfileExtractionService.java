@@ -17,16 +17,22 @@ import java.util.stream.Collectors;
  */
 public final class LlmProfileExtractionService {
 
+    private static final String LANGUAGE_BLOCK = ""
+            + "CRITICAL — OUTPUT LANGUAGE: English ONLY. "
+            + "Every string value in the JSON must be written in English (Latin script). "
+            + "Never output Chinese (中文), Japanese, or Korean characters. "
+            + "If the CV is in Chinese, translate all fields into natural English. "
+            + "Examples: degree 'Bachelor' not '本科'; programme 'Computer Science and Technology' not '计算机科学与技术'. "
+            + "Skills: Java, Python, React.js (never Chinese skill names). ";
+
     private static final String SYSTEM_PROMPT = ""
+            + LANGUAGE_BLOCK
             + "You extract structured data from a CV/resume for a university Teaching Assistant application form. "
             + "Reply with ONE JSON object only, no markdown fences, no commentary. "
             + "Keys (use null or omit only if truly absent from the document): "
             + "studentId (string), email (string), phone (string), "
             + "degree (string), programme (string), yearOfStudy (string), "
             + "skills (array of strings), availability (string), introduction (string), taExperience (string). "
-            + "LANGUAGE: All string values MUST be in English, even if the source CV is Chinese or bilingual. "
-            + "Translate faithfully; keep proper nouns (company/university names) in their commonly used English form or pinyin only when no English name exists. "
-            + "Skills use standard English names (e.g. 'Data structures and algorithms' not Chinese). "
             + "RULES: "
             + "(1) skills — REQUIRED whenever the CV lists any: extract ALL programming languages, frameworks, tools, "
             + "and methods from Skills, Projects, Experience, and Education (e.g. Java, Python, Git, MATLAB). "
@@ -66,17 +72,67 @@ public final class LlmProfileExtractionService {
         if (!client.isConfigured() || cvPlainText == null || cvPlainText.trim().isEmpty()) {
             return false;
         }
-        String userMsg = "CV text (extract and translate all fields to English in the JSON):\n" + cvPlainText.trim();
+        String cv = cvPlainText.trim();
+        JsonObject parsed = requestProfileJson(cv, false);
+        if (jsonObjectHasCjk(parsed)) {
+            parsed = requestProfileJson(cv, true);
+        }
+        mergeJsonIntoProfile(profile, parsed);
+        return true;
+    }
+
+    private JsonObject requestProfileJson(String cvPlainText, boolean strictRetry) throws IOException {
+        String userMsg = strictRetry
+                ? "RETRY — previous reply contained non-English text. "
+                + "Return the same JSON schema with EVERY string value in English only. No Chinese characters.\n\nCV:\n"
+                + cvPlainText
+                : "Extract fields and translate ALL string values to English in the JSON.\n\nCV:\n" + cvPlainText;
         String raw = client.chat(SYSTEM_PROMPT, userMsg);
         String json = stripMarkdownFence(raw);
-        JsonObject o;
         try {
-            o = JsonParser.parseString(json).getAsJsonObject();
+            return JsonParser.parseString(json).getAsJsonObject();
         } catch (Exception e) {
             throw new IOException("DeepSeek did not return valid JSON: " + raw, e);
         }
-        mergeJsonIntoProfile(profile, o);
-        return true;
+    }
+
+    /** True if any string value in the profile JSON contains CJK characters. */
+    static boolean jsonObjectHasCjk(JsonObject o) {
+        if (o == null) {
+            return false;
+        }
+        for (String key : new String[]{
+                "studentId", "email", "phone", "degree", "programme", "yearOfStudy",
+                "availability", "introduction", "taExperience"
+        }) {
+            if (o.has(key) && !o.get(key).isJsonNull()) {
+                if (containsCjk(o.get(key).getAsString())) {
+                    return true;
+                }
+            }
+        }
+        if (o.has("skills") && o.get("skills").isJsonArray()) {
+            for (JsonElement e : o.get("skills").getAsJsonArray()) {
+                if (e.isJsonPrimitive() && containsCjk(e.getAsString())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    static boolean containsCjk(String text) {
+        if (text == null || text.isEmpty()) {
+            return false;
+        }
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (Character.UnicodeBlock.of(c) == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
+                    || Character.UnicodeBlock.of(c) == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A) {
+                return true;
+            }
+        }
+        return false;
     }
 
     static void mergeJsonIntoProfile(TAProfile profile, JsonObject o) {

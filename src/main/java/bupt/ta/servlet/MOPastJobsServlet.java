@@ -1,6 +1,7 @@
 package bupt.ta.servlet;
 
 import bupt.ta.ai.AIMatchService;
+import bupt.ta.llm.DeepSeekClient;
 import bupt.ta.model.AssignedModule;
 import bupt.ta.model.Application;
 import bupt.ta.model.Job;
@@ -113,7 +114,7 @@ public class MOPastJobsServlet extends HttpServlet {
             req.setAttribute("moJobsCountOutcome", countOutcome);
         }
 
-        req.setAttribute("llmEnabled", storage.loadAiApiSettings().isEffectivelyConfigured());
+        req.setAttribute("llmEnabled", DeepSeekClient.isRuntimeConfigured(storage.loadAiApiSettings()));
         req.getRequestDispatcher("/mo/jobs.jsp").forward(req, resp);
     }
 

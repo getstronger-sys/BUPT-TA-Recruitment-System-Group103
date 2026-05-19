@@ -96,6 +96,7 @@ public final class LlmApplicantSummaryService {
                                             int currentWorkload, boolean workloadBalanced) {
         String systemPrompt = "You assist a university MO in screening TA applications. "
                 + "Return exactly 5 to 8 short lines, each line plain text without markdown bullets or numbering. "
+                + "Write in English only — no Chinese or other non-English text. "
                 + "Cover: core skills, strongest fit points, key risks/gaps, workload fairness signal, and interview recommendation. "
                 + "Use factual language and do not invent data.";
         String userMessage = buildPromptData(profile, job, match, currentWorkload, workloadBalanced);
