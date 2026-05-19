@@ -17,7 +17,7 @@ public class Application {
     private String interviewAssessment;
     private String interviewSlotId;
     private String interviewBookedAt;
-    /** TA-selected preferred role/slot for this job, e.g. TA-1, TA-2. */
+    /** Legacy field kept for old JSON data; new applications do not choose numbered TA roles. */
     private String preferredRole;
     /** MO decision reason captured when selecting/rejecting after interview. */
     private String decisionReason;

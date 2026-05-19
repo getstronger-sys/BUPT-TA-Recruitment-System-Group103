@@ -158,9 +158,6 @@ public final class InterviewCalendarSupport {
         if (job != null && job.getModuleName() != null && !job.getModuleName().trim().isEmpty()) {
             description.append("\\nModule name: ").append(escape(job.getModuleName().trim()));
         }
-        if (application.getPreferredRole() != null && !application.getPreferredRole().trim().isEmpty()) {
-            description.append("\\nPreferred role: ").append(escape(application.getPreferredRole().trim()));
-        }
         if (application.getInterviewAssessment() != null && !application.getInterviewAssessment().trim().isEmpty()) {
             description.append("\\nAssessment: ").append(escape(application.getInterviewAssessment().trim()));
         }

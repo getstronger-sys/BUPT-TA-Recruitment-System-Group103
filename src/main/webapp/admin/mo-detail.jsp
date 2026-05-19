@@ -316,10 +316,6 @@
                             <p class="pre-wrap"><%= escHtml(job.getExamTimeline() != null && !job.getExamTimeline().isEmpty() ? job.getExamTimeline() : "Not provided.") %></p>
                         </div>
                         <div class="admin-text-block">
-                            <strong>Multi-TA allocation plan</strong>
-                            <p class="pre-wrap"><%= escHtml(job.getTaAllocationPlan() != null && !job.getTaAllocationPlan().isEmpty() ? job.getTaAllocationPlan() : "Not provided.") %></p>
-                        </div>
-                        <div class="admin-text-block">
                             <strong>Work arrangements</strong>
                             <% if (job.getWorkArrangements() == null || job.getWorkArrangements().isEmpty()) { %>
                             <p>No structured work arrangements were provided.</p>
@@ -377,7 +373,6 @@
                             <th>Applicant</th>
                             <th>Job</th>
                             <th>Applied</th>
-                            <th>Preferred role</th>
                             <th>Status</th>
                             <th>Interview record</th>
                             <th>Notes</th>
@@ -404,7 +399,6 @@
                                 <div class="admin-row-subtext"><%= escHtml(job != null && job.getModuleCode() != null ? job.getModuleCode() : "-") %></div>
                             </td>
                             <td><%= escHtml(app.getAppliedAt() != null && !app.getAppliedAt().isEmpty() ? app.getAppliedAt() : "-") %></td>
-                            <td><%= escHtml(app.getPreferredRole() != null && !app.getPreferredRole().isEmpty() ? app.getPreferredRole() : "-") %></td>
                             <td><span class="status-pill <%= statusClass %>"><%= escHtml(status) %></span></td>
                             <td>
                                 <div class="admin-summary-stack">

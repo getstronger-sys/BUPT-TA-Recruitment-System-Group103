@@ -430,7 +430,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             var tas = [];
             for (var t = 0; t < taCount; t++) {
-                tas.push({ name: "TA " + (t + 1), hours: 0, workCount: {} });
+                tas.push({ name: "Workload share " + (t + 1), hours: 0, workCount: {} });
             }
             units.sort(function (a, b) { return b.hours - a.hours; });
             units.forEach(function (u) {

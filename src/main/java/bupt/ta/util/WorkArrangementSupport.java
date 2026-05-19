@@ -12,7 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Builds derived Job text fields from structured work arrangements and recalculates TA slots.
+ * Builds derived Job text fields from structured work arrangements and recalculates planned recruits.
  */
 public final class WorkArrangementSupport {
 

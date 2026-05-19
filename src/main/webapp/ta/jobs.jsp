@@ -74,7 +74,7 @@
 
             <div class="ta-panel ta-panel--tip">
                 <strong class="ta-panel__title">Quick tip</strong>
-                <p class="ta-panel__body">Open <strong>View details</strong> for full module info, schedule, payment, per-TA workload breakdown, deadline, and responsibilities, then use <strong>Review and apply</strong> to confirm your profile before submitting.</p>
+                <p class="ta-panel__body">Open <strong>View details</strong> for full module info, schedule, payment, workload estimate, deadline, and responsibilities, then use <strong>Review and apply</strong> to confirm your profile before submitting.</p>
             </div>
             <p class="ta-callout ta-callout--ai"><strong>AI skill matching</strong>: Jobs are ordered by your match score. Complete your <a href="${pageContext.request.contextPath}/ta/profile">profile skills</a> for better matching.</p>
 
@@ -156,7 +156,7 @@
                 <% if (!deadline.isEmpty()) { %>
                     <dt>Apply by</dt><dd class="ta-job-card__deadline"><%= deadline %></dd>
                 <% } %>
-                    <dt>TA slots</dt><dd class="ta-job-card__deadline"><%= j.getTaSlots() > 0 ? j.getTaSlots() : 1 %></dd>
+                    <dt>Planned recruits</dt><dd class="ta-job-card__deadline"><%= j.getTaSlots() > 0 ? j.getTaSlots() : 1 %></dd>
                 <% if (j.getExamTimeline() != null && !j.getExamTimeline().isEmpty()) { %>
                     <dt>Timeline</dt><dd class="pre-wrap"><%= escHtml(j.getExamTimeline()) %></dd>
                 <% } %>

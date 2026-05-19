@@ -128,7 +128,6 @@
                 <tr>
                     <th class="col-job">Job</th>
                     <th class="col-module">Module</th>
-                    <th class="col-module">Preferred role</th>
                     <th class="col-applied">Applied at</th>
                     <th class="col-progress">Progress</th>
                     <th class="col-status">Status</th>
@@ -163,7 +162,6 @@
                 <tr>
                     <td class="col-job"><%= escHtml(jobTitle) %></td>
                     <td class="col-module"><%= j != null ? escHtml(j.getModuleCode()) : "-" %></td>
-                    <td class="col-module"><%= escHtml(a.getPreferredRole() != null && !a.getPreferredRole().isEmpty() ? a.getPreferredRole() : "Not selected") %></td>
                     <td class="col-applied"><%= formatAppliedAt(a.getAppliedAt()) %></td>
                     <td class="col-progress">
                         <div class="progress-wrap">
@@ -255,7 +253,7 @@
                 </tr>
                 <% }
                    if (applications.isEmpty()) { %>
-                <tr><td colspan="9">No applications yet. <a href="${pageContext.request.contextPath}/ta/jobs">Find jobs</a> to apply.</td></tr>
+                <tr><td colspan="8">No applications yet. <a href="${pageContext.request.contextPath}/ta/jobs">Find jobs</a> to apply.</td></tr>
                 <% } %>
             </table>
             </div>

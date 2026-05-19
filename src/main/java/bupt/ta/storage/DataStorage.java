@@ -162,7 +162,7 @@ public class DataStorage {
             j1.setResponsibilities("Support lecture labs, answer Piazza/forum questions, and help with coursework marking and moderation.");
             j1.setTaSlots(3);
             j1.setExamTimeline("Week 4 quiz clinic; Week 8 midterm mock review; Week 12 final exam revision and marking.");
-            j1.setTaAllocationPlan("3 TAs: TA-1 handles labs and office hours; TA-2 covers coursework marking; TA-3 supports Piazza/forum and final exam script checks.");
+            j1.setTaAllocationPlan("Selected TAs share labs, office hours, coursework marking, forum support, and exam script checks according to MO scheduling needs.");
             j1.setInterviewSchedule("2026-04-18 14:00-17:00, 15 minutes per candidate.");
             j1.setInterviewLocation("EECS Building Room 402 / Teams backup link.");
             j1.setWorkArrangements(Arrays.asList(
@@ -241,7 +241,6 @@ public class DataStorage {
             a1.setApplicantName("Zhang San");
             a1.setStatus("PENDING");
             a1.setAppliedAt(java.time.LocalDateTime.now().minusDays(1).toString());
-            a1.setPreferredRole("TA-1");
             demoApps.add(a1);
 
             Application a2 = new Application();
@@ -254,7 +253,6 @@ public class DataStorage {
             a2.setInterviewTime("2026-04-18 14:30");
             a2.setInterviewLocation("EECS Building Room 402");
             a2.setInterviewAssessment("Teaching demo + Java debugging");
-            a2.setPreferredRole("TA-2");
             demoApps.add(a2);
 
             Application a3 = new Application();
@@ -264,7 +262,6 @@ public class DataStorage {
             a3.setApplicantName("Wang Wu");
             a3.setStatus("PENDING");
             a3.setAppliedAt(java.time.LocalDateTime.now().minusDays(1).toString());
-            a3.setPreferredRole("TA-1");
             demoApps.add(a3);
 
             Application a4 = new Application();
@@ -275,7 +272,6 @@ public class DataStorage {
             a4.setStatus("SELECTED");
             a4.setAppliedAt(java.time.LocalDateTime.now().minusDays(3).toString());
             a4.setNotes("Strong exam supervision experience.");
-            a4.setPreferredRole("TA-3");
             demoApps.add(a4);
 
             save(APPLICATIONS_FILE, demoApps);
@@ -335,7 +331,6 @@ public class DataStorage {
         app.setApplicantName(applicantName);
         app.setStatus(status);
         app.setAppliedAt(java.time.LocalDateTime.now().minusDays(2).toString());
-        app.setPreferredRole("TA-1");
         if (notes != null && !notes.trim().isEmpty()) {
             app.setNotes(notes);
         }
@@ -361,17 +356,6 @@ public class DataStorage {
         if (softwareEngUpdated) {
             save(JOBS_FILE, jobs);
             jobs = loadJobs();
-        }
-        boolean normalizedRole = false;
-        for (Application app : apps) {
-            if (app.getPreferredRole() == null || app.getPreferredRole().trim().isEmpty()) {
-                app.setPreferredRole("TA-1");
-                normalizedRole = true;
-            }
-        }
-        if (normalizedRole) {
-            save(APPLICATIONS_FILE, apps);
-            apps = loadApplications();
         }
         if (jobs.size() >= 3 && apps.size() >= 4) {
             return;
@@ -444,7 +428,6 @@ public class DataStorage {
             a3.setApplicantName("Wang Wu");
             a3.setStatus("PENDING");
             a3.setAppliedAt(java.time.LocalDateTime.now().minusDays(1).toString());
-            a3.setPreferredRole("TA-1");
             apps.add(a3);
             appsChanged = true;
         }
@@ -457,7 +440,6 @@ public class DataStorage {
             a4.setStatus("SELECTED");
             a4.setAppliedAt(java.time.LocalDateTime.now().minusDays(3).toString());
             a4.setNotes("Strong exam supervision experience.");
-            a4.setPreferredRole("TA-3");
             apps.add(a4);
             appsChanged = true;
         }
@@ -510,7 +492,7 @@ public class DataStorage {
             changed = true;
         }
         if (isBlank(target.getTaAllocationPlan())) {
-            target.setTaAllocationPlan("TA-1: Lead weekly labs (Groups A-L), maintain lab attendance, and first-pass debugging support; TA-2: Coursework marking (Groups M-Z), rubric calibration, and moderation notes; TA-3: Office hours, Piazza/forum response triage, and exam-day invigilation + script handover.");
+            target.setTaAllocationPlan("Selected TAs share weekly labs, attendance support, coursework marking, office hours, forum response, and exam-day handover according to MO scheduling needs.");
             changed = true;
         }
         if (isBlank(target.getInterviewSchedule())) {

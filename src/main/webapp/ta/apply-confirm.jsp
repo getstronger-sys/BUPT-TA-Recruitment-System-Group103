@@ -74,11 +74,8 @@
         <main class="main-panel">
             <p class="breadcrumb-line"><a href="${pageContext.request.contextPath}/ta/job?jobId=<%= escHtml(job.getId()) %>">&larr; Back to job details</a></p>
             <h1>Confirm your application</h1>
-            <% if ("invalid_role".equals(request.getParameter("error"))) { %>
-            <p class="error">Please choose a valid TA role for this job before submitting.</p>
-            <% } %>
             <% if ("workload_hours_cap".equals(request.getParameter("error"))) { %>
-            <p class="error">You cannot apply: your already selected posts plus this job’s estimated workload would exceed the system’s hourly cap. Withdraw from a role or contact an administrator.</p>
+            <p class="error">You cannot apply: your already selected posts plus this job's estimated workload would exceed the system's hourly cap. Withdraw an application or contact an administrator.</p>
             <% } %>
             <div class="context-card">
                 <strong>What happens next</strong>
@@ -90,7 +87,7 @@
                 <p><strong><%= escHtml(job.getTitle() != null ? job.getTitle() : "") %></strong></p>
                 <p>Module: <%= escHtml(job.getModuleCode() != null ? job.getModuleCode() : "-") %>
                     <% if (job.getModuleName() != null && !job.getModuleName().isEmpty()) { %> | <%= escHtml(job.getModuleName()) %><% } %></p>
-                <p><strong>TA slots:</strong> <%= job.getTaSlots() > 0 ? job.getTaSlots() : 1 %></p>
+                <p><strong>Planned recruits:</strong> <%= job.getTaSlots() > 0 ? job.getTaSlots() : 1 %></p>
                 <p><strong>Course timeline:</strong></p>
                 <% if (weekMilestones.isEmpty()) { %>
                 <p class="pre-wrap"><%= escHtml(job.getExamTimeline() != null && !job.getExamTimeline().isEmpty() ? job.getExamTimeline() : "Not provided") %></p>
@@ -111,7 +108,6 @@
                     <% } %>
                 </div>
                 <% } %>
-                <p class="pre-wrap"><strong>Multi-TA allocation:</strong> <%= escHtml(job.getTaAllocationPlan() != null && !job.getTaAllocationPlan().isEmpty() ? job.getTaAllocationPlan() : "Not provided") %></p>
                 <p class="pre-wrap"><strong>Interview arrangement:</strong>
                     <%= escHtml(job.getInterviewSchedule() != null && !job.getInterviewSchedule().isEmpty() ? job.getInterviewSchedule() : "Not provided") %><%
                     if (job.getInterviewLocation() != null && !job.getInterviewLocation().trim().isEmpty()) { %>
@@ -120,18 +116,6 @@
                     <br><span class="muted-inline">Location:</span> Not provided<%
                     } %>
                 </p>
-                <div class="ta-duty-board">
-                    <% for (int idx = 1; idx <= taSlots; idx++) {
-                           String allocation = idx <= allocationItems.size()
-                                   ? allocationItems.get(idx - 1)
-                                   : "General support: lab/tutorial assistance, Q&A, and exam-day backup.";
-                    %>
-                    <article class="ta-duty-card">
-                        <div class="ta-duty-head"><span class="arr-icon arr-icon-slots" aria-hidden="true">TA</span>TA-<%= idx %></div>
-                        <p class="pre-wrap"><%= allocation %></p>
-                    </article>
-                    <% } %>
-                </div>
             </div>
 
             <div class="detail-card">
@@ -160,12 +144,6 @@
                 <form action="${pageContext.request.contextPath}/ta/apply" method="post" class="apply-confirm-submit-form">
                     <%@ include file="/WEB-INF/jspf/csrf-hidden.jspf" %>
                     <input type="hidden" name="jobId" value="<%= escHtml(job.getId()) %>">
-                    <label for="preferredRole"><strong>Choose your preferred TA role</strong></label>
-                    <select id="preferredRole" name="preferredRole" class="note-input" required>
-                        <% for (int idx = 1; idx <= taSlots; idx++) { %>
-                        <option value="TA-<%= idx %>">TA-<%= idx %></option>
-                        <% } %>
-                    </select>
                     <button type="submit" class="btn btn-success btn-lg">Submit application</button>
                 </form>
             </div>

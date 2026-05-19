@@ -28,7 +28,7 @@ EBU6304 Software Engineering Group Project - A lightweight Java Servlet/JSP web 
   - **Admin assigns modules to MO** — MO may only post jobs for assigned module codes
   - **Workload caps** — per-TA selected-job count and/or estimated hours; Admin monitoring and auto-close of pending applications
 - **Core Features**:
-  - **TA**: Profile, CV upload, job search, apply with role preference, applications timeline, interview booking, match insights
+  - **TA**: Profile, CV upload, job search, apply to postings, applications timeline, interview booking, match insights
   - **MO**: Post job (assigned modules only), applicant pipeline (pending → interview → waitlist → selected/rejected), interview evaluation, calendar, on-demand AI summary
   - **Admin**: Dashboard, workload v2, monitoring, users, MO detail (module assignment), email & AI API settings
 
@@ -191,7 +191,7 @@ See **[USER_MANUAL.md](USER_MANUAL.md)** for step-by-step flows and screenshot p
 
 1. Login (e.g. `ta1` / `ta123`)
 2. **My Profile** — skills, CV upload
-3. **Find Jobs** — search and apply (role preference)
+3. **Find Jobs** — search and apply
 4. **My Applications** — status, timeline, withdraw pending
 
 ### MO Workflow
