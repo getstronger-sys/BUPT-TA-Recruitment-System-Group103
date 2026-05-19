@@ -81,7 +81,7 @@ public class MOApplicantSummaryServlet extends HttpServlet {
         boolean balanced = currentWorkload <= avgWorkload;
 
         AiApiSettings settings = storage.loadAiApiSettings();
-        DeepSeekClient client = DeepSeekClient.fromAdminSettings(settings);
+        DeepSeekClient client = DeepSeekClient.fromRuntimeSettings(settings);
         LlmApplicantSummaryService summaryService = new LlmApplicantSummaryService(client);
 
         if (settings.isStreamingEnabled() && client.isConfigured()) {

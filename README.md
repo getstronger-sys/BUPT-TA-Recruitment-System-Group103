@@ -112,7 +112,8 @@ Requires JDK 11+ configured as `JAVA_HOME`.
 
 1. Keep `ai.env.example` in Git as a template.
 2. Copy to `ai.env` locally (never commit `ai.env`).
-3. Set `TA_AI_API_KEY` and related variables, **or** configure keys in **Admin → AI API** after first login.
+3. Set `TA_AI_API_KEY` and related variables in `ai.env`, **or** configure keys in **Admin → AI API** after first login.
+4. At runtime the app prefers **Admin → AI API** settings; if no key is saved there, it **falls back to `TA_AI_*` environment variables** (loaded by `run-with-ai.ps1` or your shell).
 
 PowerShell (manual, without `run-with-ai.ps1`):
 

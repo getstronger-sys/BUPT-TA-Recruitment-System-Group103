@@ -1,5 +1,6 @@
 package bupt.ta.servlet;
 
+import bupt.ta.llm.DeepSeekClient;
 import bupt.ta.model.Application;
 import bupt.ta.model.InterviewEvaluation;
 import bupt.ta.model.Job;
@@ -79,7 +80,7 @@ public class ApplicantDetailServlet extends HttpServlet {
         req.setAttribute("pendingCount", pending);
         req.setAttribute("interviewCount", interview);
         req.setAttribute("otherCount", rejectedOrWithdrawn);
-        req.setAttribute("llmEnabled", storage.loadAiApiSettings().isEffectivelyConfigured());
+        req.setAttribute("llmEnabled", DeepSeekClient.isRuntimeConfigured(storage.loadAiApiSettings()));
         req.getRequestDispatcher("/mo/applicant-detail.jsp").forward(req, resp);
     }
 }

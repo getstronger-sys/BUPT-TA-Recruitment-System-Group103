@@ -21,17 +21,13 @@ import java.util.function.Consumer;
 /**
  * DeepSeek Chat API (OpenAI-compatible: POST /v1/chat/completions).
  * <p>
- * Two configuration paths are supported:
+ * Configuration resolution (highest priority first):
  * <ol>
- *   <li>Admin-managed JSON (preferred for the web app): build via
- *       {@link #fromAdminSettings(AiApiSettings)}. This bypasses environment variables entirely
- *       so the admin UI is the single source of truth at runtime.</li>
- *   <li>Environment variables / JVM properties (kept for local CLI use and integration tests):
- *       use the no-arg {@link #DeepSeekClient()} constructor. Recognised keys:
- *       {@code TA_AI_API_KEY} / {@code DEEPSEEK_API_KEY},
- *       {@code TA_AI_BASE_URL} / {@code DEEPSEEK_API_BASE},
- *       {@code TA_AI_MODEL} / {@code DEEPSEEK_MODEL},
- *       {@code TA_AI_ENABLED}, {@code TA_AI_PROVIDER}.</li>
+ *   <li>Admin-managed JSON ({@code data/ai-api-settings.json}) when enabled and a key is set.</li>
+ *   <li>Environment variables / JVM properties ({@code TA_AI_*}, {@code DEEPSEEK_*}) via
+ *       {@link #fromRuntimeSettings(AiApiSettings)} — used when admin settings are empty so
+ *       local {@code ai.env} + {@code run-with-ai.ps1} work without re-entering the key in Admin UI.</li>
+ *   <li>No-arg {@link #DeepSeekClient()} for tests and CLI (env only).</li>
  * </ol>
  * Never commit API keys; use env vars, CI secrets, or the admin settings file.
  */
@@ -54,10 +50,16 @@ public final class DeepSeekClient {
         this(
                 isEnabledFromEnv(),
                 resolveApiKey(),
-                firstNonBlank(System.getenv("TA_AI_BASE_URL"), System.getenv("DEEPSEEK_API_BASE"),
-                        System.getProperty("deepseek.api.base"), DEFAULT_BASE_URL),
-                firstNonBlank(System.getenv("TA_AI_MODEL"), System.getenv("DEEPSEEK_MODEL"),
-                        System.getProperty("deepseek.api.model"), DEFAULT_MODEL)
+                firstNonBlank(
+                        envOrProperty("TA_AI_BASE_URL", "TA_AI_BASE_URL"),
+                        envOrProperty("DEEPSEEK_API_BASE", "DEEPSEEK_API_BASE"),
+                        System.getProperty("deepseek.api.base"),
+                        DEFAULT_BASE_URL),
+                firstNonBlank(
+                        envOrProperty("TA_AI_MODEL", "TA_AI_MODEL"),
+                        envOrProperty("DEEPSEEK_MODEL", "DEEPSEEK_MODEL"),
+                        System.getProperty("deepseek.api.model"),
+                        DEFAULT_MODEL)
         );
     }
 
@@ -84,10 +86,8 @@ public final class DeepSeekClient {
     }
 
     /**
-     * Builds a client from admin-managed settings.
-     *
-     * @param settings admin LLM settings (may be null)
-     * @return client that is disabled when settings are null or lack an API key
+     * Build a client from admin JSON only (no env fallback). Used by the admin settings form
+     * when displaying what is stored on disk.
      */
     public static DeepSeekClient fromAdminSettings(AiApiSettings settings) {
         if (settings == null) {
@@ -102,6 +102,71 @@ public final class DeepSeekClient {
     }
 
     /**
+     * Resolve admin settings, falling back to {@code TA_AI_*} / {@code DEEPSEEK_*} environment
+     * variables when admin has no API key. This is the entry point for all servlet LLM calls.
+     */
+    public static DeepSeekClient fromRuntimeSettings(AiApiSettings stored) {
+        return fromAdminSettings(mergeWithEnvFallback(stored));
+    }
+
+    /**
+     * @return {@code true} when {@link #fromRuntimeSettings(AiApiSettings)} would be able to call the API
+     */
+    public static boolean isRuntimeConfigured(AiApiSettings stored) {
+        return fromRuntimeSettings(stored).isConfigured();
+    }
+
+    /**
+     * Copy admin settings and fill missing key/URL/model from the environment when allowed.
+     */
+    static AiApiSettings mergeWithEnvFallback(AiApiSettings stored) {
+        if (stored != null && stored.isEffectivelyConfigured()) {
+            return stored;
+        }
+        if (!isEnabledFromEnv()) {
+            return stored != null ? stored : new AiApiSettings();
+        }
+        String envKey = resolveApiKey();
+        if (envKey.isEmpty()) {
+            return stored != null ? stored : new AiApiSettings();
+        }
+        AiApiSettings merged = stored != null ? copySettings(stored) : new AiApiSettings();
+        merged.setApiEnabled(true);
+        if (merged.getApiKey() == null || merged.getApiKey().trim().isEmpty()) {
+            merged.setApiKey(envKey);
+        }
+        if (merged.getBaseUrl() == null || merged.getBaseUrl().trim().isEmpty()) {
+            merged.setBaseUrl(firstNonBlank(
+                    envOrProperty("TA_AI_BASE_URL", "TA_AI_BASE_URL"),
+                    envOrProperty("DEEPSEEK_API_BASE", "DEEPSEEK_API_BASE"),
+                    System.getProperty("deepseek.api.base"),
+                    DEFAULT_BASE_URL));
+        }
+        if (merged.getModel() == null || merged.getModel().trim().isEmpty()) {
+            merged.setModel(firstNonBlank(
+                    envOrProperty("TA_AI_MODEL", "TA_AI_MODEL"),
+                    envOrProperty("DEEPSEEK_MODEL", "DEEPSEEK_MODEL"),
+                    System.getProperty("deepseek.api.model"),
+                    DEFAULT_MODEL));
+        }
+        if (merged.getProvider() == null || merged.getProvider().trim().isEmpty()) {
+            merged.setProvider(firstNonBlank(envOrProperty("TA_AI_PROVIDER", "TA_AI_PROVIDER"), "deepseek"));
+        }
+        return merged;
+    }
+
+    private static AiApiSettings copySettings(AiApiSettings source) {
+        AiApiSettings copy = new AiApiSettings();
+        copy.setApiEnabled(source.isApiEnabled());
+        copy.setStreamingEnabled(source.isStreamingEnabled());
+        copy.setProvider(source.getProvider());
+        copy.setBaseUrl(source.getBaseUrl());
+        copy.setModel(source.getModel());
+        copy.setApiKey(source.getApiKey());
+        return copy;
+    }
+
+    /**
      * @return {@code true} when enabled and a non-blank API key is configured
      */
     public boolean isConfigured() {
@@ -109,12 +174,12 @@ public final class DeepSeekClient {
     }
 
     private static boolean isEnabledFromEnv() {
-        String enabled = firstNonBlank(System.getenv("TA_AI_ENABLED"));
+        String enabled = envOrProperty("TA_AI_ENABLED", "TA_AI_ENABLED");
         if (!enabled.isEmpty()
                 && ("false".equalsIgnoreCase(enabled) || "0".equals(enabled) || "off".equalsIgnoreCase(enabled))) {
             return false;
         }
-        return isProviderAccepted(firstNonBlank(System.getenv("TA_AI_PROVIDER")));
+        return isProviderAccepted(envOrProperty("TA_AI_PROVIDER", "TA_AI_PROVIDER"));
     }
 
     private static boolean isProviderAccepted(String provider) {
@@ -127,10 +192,14 @@ public final class DeepSeekClient {
 
     private static String resolveApiKey() {
         return firstNonBlank(
-                System.getenv("TA_AI_API_KEY"),
-                System.getenv("DEEPSEEK_API_KEY"),
+                envOrProperty("TA_AI_API_KEY", "TA_AI_API_KEY"),
+                envOrProperty("DEEPSEEK_API_KEY", "DEEPSEEK_API_KEY"),
                 System.getProperty("deepseek.api.key")
         );
+    }
+
+    private static String envOrProperty(String envName, String propertyName) {
+        return firstNonBlank(System.getenv(envName), System.getProperty(propertyName));
     }
 
     /**
